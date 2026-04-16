@@ -228,7 +228,7 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-export const WHATSAPP_NUMBER = "5491100000000"; // Replace with real number
+export const WHATSAPP_NUMBER = "5491121625796";
 export const INSTAGRAM_HANDLE = "@262.cosasricas";
 export const ADDRESS = "Tte. Gral. Eustoquio Frías 262, CABA";
 export const MAPS_LINK = "https://maps.google.com/?q=Tte.+Gral.+Eustoquio+Frías+262+Buenos+Aires";
