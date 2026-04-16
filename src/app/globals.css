@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-cormorant: 'Cormorant Garamond', serif;
+  --font-dm-sans: 'DM Sans', sans-serif;
+
+  --sage-50: #f4f7f4;
+  --sage-100: #e8efe8;
+  --sage-200: #c9d9c9;
+  --sage-400: #769b76;
+  --sage-500: #547d54;
+  --sage-600: #3f6340;
+  --sage-700: #334f34;
+
+  --salmon-100: #fce9e4;
+  --salmon-200: #f9d0c5;
+  --salmon-300: #f4ae9c;
+  --salmon-400: #ec8169;
+
+  --cream-100: #fdf9f3;
+  --cream-200: #f9f0e2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-dm-sans);
+  background-color: var(--cream-100);
+  color: #2a3028;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-cormorant);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sage-300, #a3bda3);
+  border-radius: 3px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--salmon-200);
+  color: var(--sage-700);
+}
+
+@layer components {
+  .btn-whatsapp {
+    @apply bg-[#25D366] hover:bg-[#20BD5A] text-white font-sans font-medium rounded-full
+           px-7 py-3.5 flex items-center gap-2.5 transition-all duration-300
+           shadow-[0_4px_24px_rgba(37,211,102,0.35)] hover:shadow-[0_6px_32px_rgba(37,211,102,0.50)]
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-primary {
+    @apply bg-sage-600 hover:bg-sage-700 text-white font-sans font-medium rounded-full
+           px-7 py-3.5 flex items-center gap-2.5 transition-all duration-300
+           shadow-[0_4px_20px_rgba(63,99,64,0.30)] hover:shadow-[0_6px_28px_rgba(63,99,64,0.45)]
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .section-label {
+    @apply text-sage-500 font-sans font-medium tracking-[0.2em] text-xs uppercase;
+  }
+
+  .section-title {
+    @apply font-serif text-sage-800 leading-tight;
+  }
+
+  .card-hover {
+    @apply transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl;
+  }
+
+  .grain-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+}
+
+/* Floating WhatsApp button pulse ring */
+@keyframes ping-slow {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.wa-pulse::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #25D366;
+  animation: ping-slow 2s ease-out infinite;
+}
