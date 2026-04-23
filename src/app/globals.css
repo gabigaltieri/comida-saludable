@@ -35,7 +35,7 @@ html {
 
 body {
   font-family: var(--font-dm-sans);
-  background-color: var(--cream-100);
+  background-color: #2a402b;
   color: #2a3028;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -69,6 +69,11 @@ h1, h2, h3 {
            px-7 py-3.5 flex items-center gap-2.5 transition-all duration-300
            shadow-[0_4px_24px_rgba(37,211,102,0.35)] hover:shadow-[0_6px_32px_rgba(37,211,102,0.50)]
            hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .input-admin {
+    @apply w-full rounded-xl border border-gray-200 bg-white px-4 py-3 font-sans text-sm text-gray-700
+           placeholder:text-gray-300 focus:outline-none focus:border-sage-400 transition-colors;
   }
 
   .btn-primary {
