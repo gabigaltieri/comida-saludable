@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Plus, Check, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/lib/data";
@@ -9,7 +10,7 @@ import { useCart, formatPrice } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addItem, items } = useCart();
+  const { addItem, items, openCart } = useCart();
   const [justAdded, setJustAdded] = useState(false);
 
   const cartItem = items.find((i) => i.product.id === product.id);
@@ -19,6 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
     addItem(product);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1400);
+    openCart();
   };
 
   const tagColors: Record<string, string> = {
@@ -60,16 +62,16 @@ export default function ProductCard({ product }: { product: Product }) {
       </AnimatePresence>
 
       {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-cream-200 flex-shrink-0">
+      <Link href={`/tienda/${product.id}`} className="block relative h-52 overflow-hidden bg-cream-200 flex-shrink-0">
         <Image
           src={product.image}
-          alt={product.imageAlt}
+          alt={product.imageAlt || product.name}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4 gap-3">
@@ -90,12 +92,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* Name & Description */}
         <div className="flex-1">
-          <h3
-            className="font-serif text-sage-800 text-xl font-semibold leading-snug mb-1"
-            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
-          >
-            {product.name}
-          </h3>
+          <Link href={`/tienda/${product.id}`}>
+            <h3
+              className="font-serif text-sage-800 text-xl font-semibold leading-snug mb-1 hover:text-sage-600 transition-colors"
+              style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+            >
+              {product.name}
+            </h3>
+          </Link>
           <p className="font-sans text-sm text-sage-500 leading-snug line-clamp-2">
             {product.description}
           </p>
@@ -125,28 +129,14 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
             whileTap={{ scale: 0.92 }}
           >
-            <AnimatePresence mode="wait">
-              {justAdded ? (
-                <motion.span
-                  key="check"
-                  initial={{ scale: 0, rotate: -90 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Check className="w-4 h-4" />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="plus"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <Plus className="w-4 h-4" />
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <motion.span
+              key={justAdded ? "check" : "plus"}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.18 }}
+            >
+              {justAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            </motion.span>
             {justAdded ? "¡Listo!" : "Agregar"}
           </motion.button>
         </div>
