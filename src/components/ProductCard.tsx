@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem, items, openCart } = useCart();
   const [justAdded, setJustAdded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const cartItem = items.find((i) => i.product.id === product.id);
   const quantity = cartItem?.quantity ?? 0;
@@ -63,13 +64,20 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Image */}
       <Link href={`/tienda/${product.id}`} className="block relative h-52 overflow-hidden bg-cream-200 flex-shrink-0">
-        <Image
-          src={product.image}
-          alt={product.imageAlt || product.name}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {!imgError ? (
+          <Image
+            src={product.image}
+            alt={product.imageAlt || product.name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-cream-300">
+            <ShoppingBag className="w-10 h-10 text-sage-300" />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
       </Link>
 
