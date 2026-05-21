@@ -147,7 +147,7 @@ export default function Reviews() {
 
               {/* Review text */}
               <p className="font-sans text-sm text-white/80 leading-relaxed flex-1">
-                "{review.text}"
+                &ldquo;{review.text}&rdquo;
               </p>
 
               {/* Footer */}
