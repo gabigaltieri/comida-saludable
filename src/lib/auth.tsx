@@ -26,13 +26,15 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const supabaseBrowser = createSupabaseBrowser();
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  const supabase = createSupabaseBrowser();
+  const supabase = supabaseBrowser;
 
   const isEmailConfirmed = !!user?.email_confirmed_at;
 

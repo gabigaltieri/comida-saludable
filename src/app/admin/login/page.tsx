@@ -30,8 +30,7 @@ export default function AdminLogin() {
       setTimeout(() => setShake(false), 500);
       setLoading(false);
     } else {
-      router.push("/admin");
-      router.refresh();
+      window.location.href = "/admin";
     }
   };
 
