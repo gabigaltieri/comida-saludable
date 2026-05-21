@@ -209,7 +209,7 @@ export interface Combo {
   sort_order?: number;
 }
 
-export const WHATSAPP_NUMBER = "5491121625796";
+export const WHATSAPP_NUMBER = "5491138567142";
 export const INSTAGRAM_HANDLE = "@262.cosasricas";
 export const ADDRESS = "Tte. Gral. Eustoquio Frías 262, CABA";
 export const MAPS_LINK = "https://maps.google.com/?q=Tte.+Gral.+Eustoquio+Frías+262+Buenos+Aires";
