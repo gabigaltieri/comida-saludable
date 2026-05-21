@@ -20,10 +20,18 @@ function verifySignature(req: NextRequest, body: string): boolean {
   const ts = tsPart.replace("ts=", "");
   const v1 = v1Part.replace("v1=", "");
 
+  // Rechazar webhooks con más de 5 minutos de antigüedad (previene replay attacks)
+  const tsNum = parseInt(ts, 10);
+  if (isNaN(tsNum) || Math.abs(Date.now() / 1000 - tsNum) > 300) return false;
+
   const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
   const expected = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
 
-  return expected === v1;
+  // Comparación en tiempo constante para prevenir timing attacks
+  const expectedBuf = Buffer.from(expected, "hex");
+  const v1Buf = Buffer.from(v1, "hex");
+  if (expectedBuf.length !== v1Buf.length) return false;
+  return crypto.timingSafeEqual(expectedBuf, v1Buf);
 }
 
 export async function POST(req: NextRequest) {

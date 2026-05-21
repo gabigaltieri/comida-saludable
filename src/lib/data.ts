@@ -5,13 +5,15 @@ export interface Product {
   price: number;
   category: CategoryId;
   image: string;
+  image2?: string;
+  image3?: string;
   imageAlt: string;
   tags: string[];
   featured?: boolean;
   available: boolean;
 }
 
-export type CategoryId = "viandas-diarias" | "viandas-congeladas" | "ensaladas-tartas" | "catering";
+export type CategoryId = "viandas-diarias" | "viandas-congeladas" | "ensaladas-tartas";
 
 export interface Category {
   id: CategoryId;
@@ -50,15 +52,6 @@ export const CATEGORIES: Category[] = [
     image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
     imageAlt: "Ensalada fresca colorida con vegetales de temporada y proteína",
     emoji: "🥗",
-  },
-  {
-    id: "catering",
-    name: "Catering para Eventos",
-    shortName: "Catering",
-    description: "Desayunos de trabajo, reuniones y eventos con una propuesta saludable y elegante.",
-    image: "https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80",
-    imageAlt: "Catering saludable boutique para eventos corporativos y sociales",
-    emoji: "🎉",
   },
 ];
 
@@ -202,31 +195,19 @@ export const PRODUCTS: Product[] = [
     tags: ["vegetariano", "gourmet"],
     available: true,
   },
-  // Catering
-  {
-    id: "cat-01",
-    name: "Desayuno Ejecutivo",
-    description: "Mini sándwiches integrales, jugos prensados, frutas de temporada y café specialty. Desde 10 personas.",
-    price: 8500,
-    category: "catering",
-    image: "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=600&q=80",
-    imageAlt: "Desayuno corporativo saludable con frutas jugos y sandwiches integrales",
-    tags: ["corporativo", "desde 10 pax"],
-    featured: true,
-    available: true,
-  },
-  {
-    id: "cat-02",
-    name: "Lunch Boutique",
-    description: "Catering completo para reuniones y eventos: entrada, principal y postre saludable.",
-    price: 14000,
-    category: "catering",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80",
-    imageAlt: "Servicio de catering boutique con bandejas elegantes para eventos",
-    tags: ["eventos", "completo", "desde 20 pax"],
-    available: true,
-  },
 ];
+
+export interface Combo {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  imageAlt: string;
+  product_ids: string[];
+  available: boolean;
+  sort_order?: number;
+}
 
 export const WHATSAPP_NUMBER = "5491121625796";
 export const INSTAGRAM_HANDLE = "@262.cosasricas";

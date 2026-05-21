@@ -31,9 +31,9 @@ export default function LocationSection() {
               viewport={{ once: true }}
               style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
             >
-              Estamos en el corazón
+              Vení a conocer
               <br />
-              del barrio.
+              nuestro local.
             </motion.h2>
 
             <motion.div

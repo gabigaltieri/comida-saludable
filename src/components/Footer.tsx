@@ -92,7 +92,6 @@ export default function Footer() {
                 {[
                   { label: "Inicio", href: "#" },
                   { label: "Menú completo", href: "#menu" },
-                  { label: "Catering", href: "#catering" },
                   { label: "Reseñas", href: "#about" },
                   { label: "Contacto", href: "#location" },
                 ].map((link) => (

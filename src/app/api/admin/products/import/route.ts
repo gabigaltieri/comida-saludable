@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +28,31 @@ export async function POST(req: NextRequest) {
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  const wb = XLSX.read(arrayBuffer, { type: "array" });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(arrayBuffer);
+  const ws = wb.worksheets[0];
+
+  if (!ws || ws.rowCount < 2) {
+    return NextResponse.json({ error: "El archivo está vacío." }, { status: 400 });
+  }
+
+  // Extraer cabeceras de la primera fila
+  const headers: string[] = [];
+  ws.getRow(1).eachCell({ includeEmpty: true }, (cell) => {
+    headers.push(cell.text);
+  });
+
+  // Construir objetos por fila (saltar fila de cabecera)
+  const rows: Record<string, unknown>[] = [];
+  ws.eachRow((row, rowNum) => {
+    if (rowNum === 1) return;
+    const record: Record<string, unknown> = {};
+    row.eachCell({ includeEmpty: true }, (cell, colIdx) => {
+      const header = headers[colIdx - 1];
+      if (header) record[header] = cell.value;
+    });
+    rows.push(record);
+  });
 
   if (!rows.length) return NextResponse.json({ error: "El archivo está vacío." }, { status: 400 });
 
@@ -68,7 +90,6 @@ export async function POST(req: NextRequest) {
     const existingId = String(row["id"] ?? "").trim();
 
     if (existingId) {
-      // Actualizar producto existente
       const { error } = await supabaseAdmin
         .from("products")
         .update(payload)
@@ -77,7 +98,6 @@ export async function POST(req: NextRequest) {
       if (error) errors.push(`Error actualizando "${nombre}": ${error.message}`);
       else updated++;
     } else {
-      // Crear nuevo producto
       const { error } = await supabaseAdmin
         .from("products")
         .insert({ id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...payload });

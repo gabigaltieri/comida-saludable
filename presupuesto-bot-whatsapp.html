@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Presupuesto — Bot WhatsApp & Automatización</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f0;
+      padding: 32px 16px;
+      color: #1e2e1f;
+    }
+
+    .page {
+      width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* HEADER */
+    .header {
+      background: #2a402b;
+      border-radius: 20px;
+      padding: 32px 36px 30px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .header-left h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 30px;
+      font-weight: 600;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .header-left p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+    }
+    .header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .header-right .presup-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 6px;
+    }
+    .header-right .presup-num {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.6);
+    }
+    .header-right .presup-date {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 4px;
+    }
+
+    /* PARTIES */
+    .parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      page-break-after: avoid;
+    }
+    .party-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 1px solid #dce8dc;
+    }
+    .party-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #769b76;
+      margin-bottom: 10px;
+    }
+    .party-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e2e1f;
+      margin-bottom: 4px;
+    }
+    .party-detail {
+      font-size: 12.5px;
+      color: #8aaa8a;
+      line-height: 1.6;
+    }
+
+    /* CARD */
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px 28px;
+      border: 1px solid #dce8dc;
+    }
+    .card-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #769b76;
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e2e1f;
+      margin-bottom: 16px;
+    }
+    .divider {
+      height: 1px;
+      background: #e8efe8;
+      margin: 20px 0;
+    }
+
+    /* SERVICE ITEM */
+    .service-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f5f0;
+    }
+    .service-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .service-item:first-child { padding-top: 0; }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .icon-green { background: #e8efe8; }
+    .icon-blue  { background: #e8f0f8; }
+    .icon-warm  { background: #fce9e4; }
+
+    .service-body { flex: 1; }
+    .service-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e2e1f;
+      margin-bottom: 4px;
+    }
+    .service-desc {
+      font-size: 12.5px;
+      color: #8aaa8a;
+      line-height: 1.55;
+    }
+    .service-features {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      background: #f4f7f4;
+      border: 1px solid #dce8dc;
+      color: #547d54;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+    .service-price {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .price-amount {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e2e1f;
+    }
+    .price-currency {
+      font-size: 12px;
+      color: #a3bda3;
+      display: block;
+    }
+
+    /* TOTAL BOX */
+    .total-box {
+      background: #2a402b;
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .total-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+    }
+    .total-sublabel {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 2px;
+    }
+    .total-amount {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 38px;
+      font-weight: 600;
+      color: white;
+      line-height: 1;
+    }
+    .total-usd {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      margin-left: 6px;
+    }
+
+    /* COSTOS OPERATIVOS */
+    .op-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f5f0;
+    }
+    .op-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .op-row:first-child { padding-top: 0; }
+    .op-name { font-size: 14px; font-weight: 500; color: #1e2e1f; }
+    .op-note { font-size: 12px; color: #a3bda3; margin-top: 2px; }
+    .op-price { font-size: 14px; font-weight: 600; color: #547d54; }
+    .op-free {
+      font-size: 12px;
+      font-weight: 600;
+      color: #547d54;
+      background: #e8efe8;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    /* MANTENIMIENTO */
+    .mant-box {
+      background: #f4f7f4;
+      border: 1.5px dashed #c9d9c9;
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .mant-label { font-size: 13px; font-weight: 600; color: #334f34; margin-bottom: 2px; }
+    .mant-desc { font-size: 12px; color: #8aaa8a; line-height: 1.5; }
+    .mant-price { text-align: right; flex-shrink: 0; }
+    .mant-amount { font-size: 22px; font-weight: 600; color: #334f34; }
+    .mant-per { font-size: 11px; color: #a3bda3; }
+
+    /* TECH STACK */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .tech-item {
+      background: #f4f7f4;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .tech-icon { font-size: 26px; margin-bottom: 8px; }
+    .tech-name { font-size: 13px; font-weight: 600; color: #1e2e1f; margin-bottom: 2px; }
+    .tech-role { font-size: 11px; color: #a3bda3; }
+
+    /* TIMELINE */
+    .timeline { display: flex; flex-direction: column; gap: 14px; }
+    .tl-row { display: flex; align-items: flex-start; gap: 14px; }
+    .tl-num {
+      width: 30px; height: 30px;
+      background: #547d54; color: white;
+      border-radius: 50%; font-size: 12px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .tl-title { font-size: 14px; font-weight: 600; color: #1e2e1f; margin-bottom: 2px; }
+    .tl-desc { font-size: 12.5px; color: #8aaa8a; line-height: 1.5; }
+    .tl-days {
+      font-size: 11px; font-weight: 600;
+      color: #547d54; background: #e8efe8;
+      padding: 2px 8px; border-radius: 100px;
+      margin-left: 8px; vertical-align: middle;
+    }
+
+    /* NOTE */
+    .note {
+      background: #fff7f5;
+      border-left: 3px solid #ec8169;
+      border-radius: 0 10px 10px 0;
+      padding: 13px 16px;
+      font-size: 12.5px;
+      color: #5a3a30;
+      line-height: 1.6;
+    }
+
+    /* CONDICIONES */
+    .cond-list { display: flex; flex-direction: column; gap: 8px; }
+    .cond-row { display: flex; gap: 10px; align-items: flex-start; }
+    .cond-dot { color: #547d54; font-weight: 700; margin-top: 1px; flex-shrink: 0; }
+    .cond-text { font-size: 13px; color: #5a7a5a; line-height: 1.5; }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 8px 0;
+      font-size: 12px;
+      color: #a3bda3;
+      line-height: 1.7;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .page { width: 100%; }
+      .header, .total-box, .tl-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Presupuesto<br/>Bot WhatsApp</h1>
+      <p>Automatización de ventas y<br/>seguimiento de clientes</p>
+    </div>
+    <div class="header-right">
+      <p class="presup-label">Presupuesto</p>
+      <p class="presup-num">#001 · 262 Cosas Ricas</p>
+      <p class="presup-date">Abril 2026</p>
+    </div>
+  </div>
+
+  <!-- PARTES -->
+  <div class="parties">
+    <div class="party-card">
+      <p class="party-label">Cliente</p>
+      <p class="party-name">262 Cosas Ricas</p>
+      <p class="party-detail">Viandas saludables<br/>Palermo / Villa Crespo, CABA</p>
+    </div>
+    <div class="party-card">
+      <p class="party-label">Desarrollador</p>
+      <p class="party-name">Gabriel Galtieri</p>
+      <p class="party-detail">gabrielgaltieri2@gmail.com<br/>Automatización & Desarrollo Web</p>
+    </div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <div class="card">
+    <p class="card-label">Detalle de servicios</p>
+    <p class="card-title">¿Qué incluye?</p>
+
+    <!-- BOT -->
+    <div class="service-item">
+      <div class="service-icon icon-green">🤖</div>
+      <div class="service-body">
+        <p class="service-name">Bot conversacional con IA</p>
+        <p class="service-desc">Bot de WhatsApp que guía al cliente paso a paso, entiende sus preferencias y le arma un combo o plato personalizado del menú de viandas congeladas.</p>
+        <div class="service-features">
+          <span class="tag">Catálogo 10–15 productos</span>
+          <span class="tag">Recomendación por IA</span>
+          <span class="tag">Creación de combos</span>
+          <span class="tag">Toma de pedido</span>
+          <span class="tag">Respuesta 24/7</span>
+        </div>
+      </div>
+      <div class="service-price">
+        <span class="price-currency">USD</span>
+        <span class="price-amount">350</span>
+      </div>
+    </div>
+
+    <!-- SEGUIMIENTO -->
+    <div class="service-item">
+      <div class="service-icon icon-blue">🔔</div>
+      <div class="service-body">
+        <p class="service-name">Automatización de seguimiento</p>
+        <p class="service-desc">Sistema que detecta cuándo fue la última compra de cada cliente y le manda un mensaje automático por WhatsApp para recordarle volver a pedir.</p>
+        <div class="service-features">
+          <span class="tag">Mensajes programados</span>
+          <span class="tag">Recordatorio de recompra</span>
+          <span class="tag">Personalizado por cliente</span>
+        </div>
+      </div>
+      <div class="service-price">
+        <span class="price-currency">USD</span>
+        <span class="price-amount">150</span>
+      </div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="service-item">
+      <div class="service-icon icon-warm">⚙️</div>
+      <div class="service-body">
+        <p class="service-name">Configuración y entrega</p>
+        <p class="service-desc">Setup completo de n8n, conexión con la API de OpenAI y WhatsApp Business, carga del catálogo, pruebas y entrega con guía de uso.</p>
+        <div class="service-features">
+          <span class="tag">Setup n8n</span>
+          <span class="tag">Conexión WhatsApp Business</span>
+          <span class="tag">Guía de uso</span>
+        </div>
+      </div>
+      <div class="service-price">
+        <span class="price-currency" style="opacity:0">USD</span>
+        <span class="price-amount" style="font-size:15px; color:#769b76;">incluido</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- TOTAL -->
+    <div class="total-box">
+      <div>
+        <p class="total-label">Total desarrollo</p>
+        <p class="total-sublabel">Pago único · No incluye costos operativos</p>
+      </div>
+      <div>
+        <span class="total-amount">$500</span>
+        <span class="total-usd">USD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COSTOS OPERATIVOS -->
+  <div class="card">
+    <p class="card-label">Costos operativos mensuales</p>
+    <p class="card-title">Lo que paga el negocio</p>
+
+    <div class="op-row">
+      <div>
+        <p class="op-name">WhatsApp Business API</p>
+        <p class="op-note">Meta da 1.000 conversaciones gratis por mes. Para un negocio chico suele alcanzar.</p>
+      </div>
+      <span class="op-free">Gratis*</span>
+    </div>
+
+    <div class="op-row">
+      <div>
+        <p class="op-name">OpenAI API (ChatGPT)</p>
+        <p class="op-note">Estimado según volumen de mensajes mensuales del negocio.</p>
+      </div>
+      <p class="op-price">~$10–20 USD/mes</p>
+    </div>
+
+    <div class="op-row">
+      <div>
+        <p class="op-name">n8n (automatización)</p>
+        <p class="op-note">Se puede instalar gratis en un servidor propio (VPS ~$5/mes) o usar la versión cloud.</p>
+      </div>
+      <p class="op-price">$0–20 USD/mes</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="note">
+      💡 El costo operativo total estimado para un negocio del tamaño de 262 Cosas Ricas es de <strong>$10 a $40 USD por mes</strong>, dependiendo del volumen de mensajes.
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- MANTENIMIENTO -->
+    <div class="mant-box">
+      <div>
+        <p class="mant-label">Mantenimiento mensual (opcional)</p>
+        <p class="mant-desc">Ajustes al bot, actualización del catálogo, soporte ante errores y mejoras menores. No es obligatorio.</p>
+      </div>
+      <div class="mant-price">
+        <p class="mant-amount">$50</p>
+        <p class="mant-per">USD / mes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="card">
+    <p class="card-label">Tecnologías utilizadas</p>
+    <p class="card-title">Herramientas del proyecto</p>
+
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon">⚡</div>
+        <p class="tech-name">n8n</p>
+        <p class="tech-role">Automatización de flujos</p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🧠</div>
+        <p class="tech-name">ChatGPT API</p>
+        <p class="tech-role">Inteligencia del bot</p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">💬</div>
+        <p class="tech-name">WhatsApp Business</p>
+        <p class="tech-role">Canal de comunicación</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="card">
+    <p class="card-label">Tiempo estimado</p>
+    <p class="card-title">Etapas del proyecto</p>
+
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-num">1</div>
+        <div>
+          <p class="tl-title">Configuración base <span class="tl-days">3–4 días</span></p>
+          <p class="tl-desc">Setup de n8n, WhatsApp Business y OpenAI. Conexión entre plataformas.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-num">2</div>
+        <div>
+          <p class="tl-title">Bot conversacional <span class="tl-days">5–7 días</span></p>
+          <p class="tl-desc">Diseño del flujo, carga del catálogo, lógica de recomendaciones y combos.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-num">3</div>
+        <div>
+          <p class="tl-title">Automatización de seguimiento <span class="tl-days">3–4 días</span></p>
+          <p class="tl-desc">Workflow de mensajes post-compra y recordatorios programados.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-num">4</div>
+        <div>
+          <p class="tl-title">Pruebas y entrega <span class="tl-days">2–3 días</span></p>
+          <p class="tl-desc">Testing completo, ajustes finales y entrega con guía de uso.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="font-size:13px; color:#8aaa8a; text-align:center;">Tiempo total estimado: <strong style="color:#334f34;">2 a 3 semanas</strong></p>
+  </div>
+
+  <!-- CONDICIONES -->
+  <div class="card">
+    <p class="card-label">Condiciones</p>
+    <p class="card-title">Forma de pago y acuerdos</p>
+
+    <div class="cond-list">
+      <div class="cond-row">
+        <span class="cond-dot">→</span>
+        <p class="cond-text"><strong>50% al inicio</strong> del proyecto ($250 USD) y <strong>50% a la entrega</strong> ($250 USD).</p>
+      </div>
+      <div class="cond-row">
+        <span class="cond-dot">→</span>
+        <p class="cond-text">Las cuentas de WhatsApp Business, OpenAI y n8n las crea y paga <strong>el cliente directamente</strong>.</p>
+      </div>
+      <div class="cond-row">
+        <span class="cond-dot">→</span>
+        <p class="cond-text">Se incluye <strong>1 mes de soporte gratuito</strong> tras la entrega para corrección de errores.</p>
+      </div>
+      <div class="cond-row">
+        <span class="cond-dot">→</span>
+        <p class="cond-text">Presupuesto <strong>válido por 30 días</strong> desde la fecha de emisión.</p>
+      </div>
+      <div class="cond-row">
+        <span class="cond-dot">→</span>
+        <p class="cond-text">Cambios de alcance fuera del detalle acordado se cotizan aparte.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>Gabriel Galtieri · gabrielgaltieri2@gmail.com</p>
+    <p>Presupuesto #001 · 262 Cosas Ricas · Abril 2026</p>
+  </div>
+
+</div>
+</body>
+</html>

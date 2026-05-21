@@ -21,7 +21,7 @@ const REVIEWS = [
     avatarColor: "bg-salmon-400",
     rating: 5,
     date: "Hace 1 mes",
-    text: "Contraté el catering para el desayuno de nuestra empresa y fue un éxito total. Presentación hermosa, todo muy rico y saludable. Ya les voy a pedir para el próximo evento.",
+    text: "El pollo al curry congelado es una joya. Llego tarde del trabajo, lo caliento en 10 minutos y tengo una comida increíble. Ya pedí 3 veces esta semana.",
     via: "Google",
   },
   {

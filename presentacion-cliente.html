@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>262 Cosas Ricas — Maqueta</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+
+    .page {
+      width: 620px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: #2a402b;
+      border-radius: 20px;
+      padding: 44px 40px 40px;
+      text-align: center;
+      color: white;
+    }
+    .header-icon {
+      width: 60px;
+      height: 60px;
+      background: #547d54;
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      line-height: 1;
+    }
+    .header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 44px;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .header .tagline {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 22px;
+    }
+    .header .pill {
+      display: inline-block;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.13);
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      padding: 6px 18px;
+      border-radius: 100px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid #dce8dc;
+    }
+    .card-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #769b76;
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1e2e1f;
+      margin-bottom: 22px;
+    }
+    .divider {
+      height: 1px;
+      background: #e8efe8;
+      margin: 22px 0;
+    }
+
+    /* ── URL ROW ── */
+    .url-row {
+      background: #f4f7f4;
+      border: 1.5px solid #c9d9c9;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .url-row-icon {
+      width: 42px;
+      height: 42px;
+      background: #e8efe8;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .url-row-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #769b76;
+      margin-bottom: 3px;
+    }
+    .url-row-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e2e1f;
+    }
+    .url-note {
+      font-size: 13px;
+      color: #8aaa8a;
+      line-height: 1.55;
+    }
+
+    /* ── PASSWORD ROW ── */
+    .pass-row {
+      background: #2a402b;
+      border-radius: 14px;
+      padding: 18px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .pass-row-icon {
+      width: 42px;
+      height: 42px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .pass-row-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 3px;
+    }
+    .pass-row-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── STEPS ── */
+    .steps { display: flex; flex-direction: column; gap: 16px; }
+    .step { display: flex; align-items: flex-start; gap: 14px; }
+    .step-num {
+      width: 30px;
+      height: 30px;
+      background: #547d54;
+      color: white;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-title { font-size: 14px; font-weight: 600; color: #1e2e1f; margin-bottom: 2px; }
+    .step-desc { font-size: 13px; color: #7a907a; line-height: 1.5; }
+    .step-url { color: #547d54; font-weight: 500; }
+
+    /* ── NOTE ── */
+    .note {
+      background: #fff7f5;
+      border-left: 3px solid #ec8169;
+      border-radius: 0 10px 10px 0;
+      padding: 13px 16px;
+      font-size: 12.5px;
+      color: #5a3a30;
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 10px 0 4px;
+      font-size: 12px;
+      color: #a3bda3;
+      line-height: 1.7;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: white; padding: 0; display: block; }
+      .page { width: 100%; }
+      .card { border-color: #ccc; page-break-inside: avoid; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .pass-row { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .step-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .url-row { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon">🌿</div>
+    <h1>262 Cosas Ricas</h1>
+    <p class="tagline">Viandas Saludables · Buenos Aires</p>
+    <span class="pill">Presentación de maqueta · Abril 2026</span>
+  </div>
+
+  <!-- TIENDA -->
+  <div class="card">
+    <p class="card-label">Tu tienda online</p>
+    <p class="card-title">Sitio web público</p>
+
+    <div class="url-row">
+      <div class="url-row-icon">🛍️</div>
+      <div>
+        <p class="url-row-label">Link de la tienda</p>
+        <p class="url-row-value">https://262-cosas-ricas.vercel.app</p>
+      </div>
+    </div>
+
+    <p class="url-note">Este es el link que ven tus clientes. Podés compartirlo por Instagram, WhatsApp o donde quieras.</p>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="card">
+    <p class="card-label">Panel de administración</p>
+    <p class="card-title">Acceso al admin</p>
+
+    <div class="url-row">
+      <div class="url-row-icon">⚙️</div>
+      <div>
+        <p class="url-row-label">URL del panel</p>
+        <p class="url-row-value">https://262-cosas-ricas.vercel.app/admin</p>
+      </div>
+    </div>
+
+    <div class="pass-row">
+      <div class="pass-row-icon">🔒</div>
+      <div>
+        <p class="pass-row-label">Contraseña</p>
+        <p class="pass-row-value">admin262</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASOS -->
+  <div class="card">
+    <p class="card-label">Primeros pasos</p>
+    <p class="card-title">Cómo ingresar al panel</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <p class="step-title">Abrí el panel</p>
+          <p class="step-desc">Ingresá a <span class="step-url">262-cosas-ricas.vercel.app/admin</span> desde tu celular o computadora.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <p class="step-title">Ingresá la contraseña</p>
+          <p class="step-desc">Escribí <strong>admin262</strong> y tocá "Ingresar".</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <p class="step-title">Explorá el panel</p>
+          <p class="step-desc">Desde el menú podés ver el Dashboard, gestionar Productos y revisar Pedidos.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="note">
+      ⚠️ <strong>Esta es una maqueta de presentación.</strong> Los datos (productos, pedidos) son de ejemplo. En la versión final se conectará a tu catálogo real.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>Desarrollado por Gabriel Galtieri · gabrielgaltieri2@gmail.com</p>
+    <p>262 Cosas Ricas · 2026</p>
+  </div>
+
+</div>
+</body>
+</html>

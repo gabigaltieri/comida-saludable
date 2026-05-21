@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
@@ -16,45 +16,44 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const rows = (data ?? []).map((p) => ({
-    id:          p.id,
-    nombre:      p.name,
-    descripcion: p.description ?? "",
-    precio:      p.price,
-    categoria:   p.category,
-    imagen1:     p.image ?? "",
-    imagen2:     p.image2 ?? "",
-    imagen3:     p.image3 ?? "",
-    imagen_alt:  p.image_alt ?? "",
-    tags:        Array.isArray(p.tags) ? p.tags.join(", ") : (p.tags ?? ""),
-    destacado:   p.featured ? "SI" : "NO",
-    disponible:  p.available ? "SI" : "NO",
-  }));
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Productos");
 
-  const ws = XLSX.utils.json_to_sheet(rows);
-
-  // Anchos de columna
-  ws["!cols"] = [
-    { wch: 20 }, // id
-    { wch: 32 }, // nombre
-    { wch: 45 }, // descripcion
-    { wch: 10 }, // precio
-    { wch: 22 }, // categoria
-    { wch: 50 }, // imagen1
-    { wch: 50 }, // imagen2
-    { wch: 50 }, // imagen3
-    { wch: 30 }, // imagen_alt
-    { wch: 30 }, // tags
-    { wch: 10 }, // destacado
-    { wch: 10 }, // disponible
+  ws.columns = [
+    { header: "id",          key: "id",          width: 20 },
+    { header: "nombre",      key: "nombre",      width: 32 },
+    { header: "descripcion", key: "descripcion", width: 45 },
+    { header: "precio",      key: "precio",      width: 10 },
+    { header: "categoria",   key: "categoria",   width: 22 },
+    { header: "imagen1",     key: "imagen1",     width: 50 },
+    { header: "imagen2",     key: "imagen2",     width: 50 },
+    { header: "imagen3",     key: "imagen3",     width: 50 },
+    { header: "imagen_alt",  key: "imagen_alt",  width: 30 },
+    { header: "tags",        key: "tags",        width: 30 },
+    { header: "destacado",   key: "destacado",   width: 10 },
+    { header: "disponible",  key: "disponible",  width: 10 },
   ];
 
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Productos");
+  ws.addRows(
+    (data ?? []).map((p) => ({
+      id:          p.id,
+      nombre:      p.name,
+      descripcion: p.description ?? "",
+      precio:      p.price,
+      categoria:   p.category,
+      imagen1:     p.image ?? "",
+      imagen2:     p.image2 ?? "",
+      imagen3:     p.image3 ?? "",
+      imagen_alt:  p.image_alt ?? "",
+      tags:        Array.isArray(p.tags) ? p.tags.join(", ") : (p.tags ?? ""),
+      destacado:   p.featured ? "SI" : "NO",
+      disponible:  p.available ? "SI" : "NO",
+    }))
+  );
 
-  const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  const buffer = await wb.xlsx.writeBuffer();
 
-  return new NextResponse(buffer, {
+  return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename="262-productos-${new Date().toISOString().slice(0, 10)}.xlsx"`,
