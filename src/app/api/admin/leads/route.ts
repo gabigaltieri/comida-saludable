@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function GET() {
-  const { data, error } = await supabase
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const { data, error } = await supabaseAdmin
     .from("leads")
     .select("*")
     .order("created_at", { ascending: false });
@@ -19,8 +18,11 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const { id, estado } = await req.json();
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("leads")
     .update({ estado })
     .eq("id", id);
