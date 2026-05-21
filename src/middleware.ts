@@ -25,10 +25,17 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Supabase unavailable — treat as unauthenticated
+  }
 
   const isLoginPage = request.nextUrl.pathname === "/admin/login";
-  const isAdmin = user?.email === process.env.ADMIN_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL || "262cosasricas.web@gmail.com";
+  const isAdmin = user?.email === adminEmail;
 
   if (!user && !isLoginPage) {
     const url = request.nextUrl.clone();
