@@ -99,22 +99,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [apiError, setApiError] = useState<string | null>(null);
-
   const fetchData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
       const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
-      if (res.ok) {
-        setData(await res.json());
-        setApiError(null);
-      } else {
-        const body = await res.json().catch(() => ({}));
-        setApiError(`HTTP ${res.status}: ${body.error ?? "sin detalle"}`);
-      }
-    } catch (e) {
-      setApiError(String(e));
+      if (res.ok) setData(await res.json());
     } finally {
       if (!silent) setLoading(false);
       else setRefreshing(false);
@@ -155,9 +145,6 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <p className="font-sans text-sm text-gray-400">Error al cargar el dashboard</p>
-        {apiError && (
-          <p className="font-mono text-xs text-red-400 bg-red-50 px-3 py-2 rounded-lg max-w-sm text-center">{apiError}</p>
-        )}
         <button
           onClick={() => fetchData()}
           className="font-sans text-xs text-sage-500 hover:text-sage-700 underline"
