@@ -1,9 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { WHATSAPP_NUMBER } from "@/lib/data";
 
 export default function WhatsAppButton() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <motion.a
       href={`https://wa.me/${WHATSAPP_NUMBER}`}
