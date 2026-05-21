@@ -27,8 +27,8 @@ export async function middleware(request: NextRequest) {
 
   let user = null;
   try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    const { data } = await supabase.auth.getSession();
+    user = data.session?.user ?? null;
   } catch {
     // Supabase unavailable — treat as unauthenticated
   }
