@@ -635,7 +635,7 @@ export default function ViandaSlugPage({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04, duration: 0.3 }}
                   >
-                    <ProductCard product={product} />
+                    <ProductCard product={product} showCart={categoryType === "with-cart"} />
                   </motion.div>
                 ))}
               </motion.div>
