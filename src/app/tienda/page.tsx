@@ -93,17 +93,18 @@ function ViewOnlyCard({ product }: { product: Product }) {
 
 function DiariasBanner() {
   return (
-    <div
-      className="flex flex-col sm:flex-row items-center justify-between gap-5 px-6 py-5"
-      style={{ background: "white", borderBottom: "1px solid #e5e0d8" }}
-    >
+    <div className="max-w-6xl mx-auto px-5 md:px-8 pt-6">
+      <div
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-5 py-4"
+        style={{ background: "white", border: "1px solid #e5e0d8" }}
+      >
       <p
-        className="font-serif font-light text-xl md:text-2xl leading-snug max-w-sm"
+        className="font-serif font-light text-lg md:text-xl leading-snug"
         style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#5a6b3a" }}
       >
         Vení a buscar tus opciones saludables de mediodía
       </p>
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
         <a
           href={`https://wa.me/${WHATSAPP_NUMBER}`}
           target="_blank"
@@ -132,6 +133,7 @@ function DiariasBanner() {
           <span>🛵</span>
           Rappi
         </a>
+      </div>
       </div>
     </div>
   );
@@ -293,7 +295,6 @@ export default function TiendaPage() {
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
       <StoreNavbar />
-      <DiariasBanner />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>
@@ -334,6 +335,9 @@ export default function TiendaPage() {
           </motion.p>
         </div>
       </div>
+
+      {/* Cartel delivery */}
+      <DiariasBanner />
 
       <main className="max-w-6xl mx-auto px-5 md:px-8 py-12">
         {loading ? (
