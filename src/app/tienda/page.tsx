@@ -336,9 +336,6 @@ export default function TiendaPage() {
         </div>
       </div>
 
-      {/* Cartel delivery */}
-      <DiariasBanner />
-
       <main className="max-w-6xl mx-auto px-5 md:px-8 py-12">
         {loading ? (
           <div className="flex justify-center py-32">
