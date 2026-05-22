@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Plus, Pencil, Trash2, X, Save, Loader2, CheckCircle2, XCircle, Tag } from "lucide-react";
+import { CATEGORIES } from "@/lib/data";
 
-type TagItem = { id: number; name: string; color: string };
+type TagItem = { id: number; name: string; color: string; category_id?: string | null };
 
 const PRESET_COLORS = [
   "#9A8B6E", "#547d54", "#2a402b", "#D4B882",
@@ -22,6 +23,7 @@ export default function AdminTags() {
   const [modal, setModal] = useState<{ mode: "add" | "edit"; tag?: TagItem } | null>(null);
   const [draftName, setDraftName] = useState("");
   const [draftColor, setDraftColor] = useState("#9A8B6E");
+  const [draftCategory, setDraftCategory] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   // Delete confirm
@@ -44,12 +46,14 @@ export default function AdminTags() {
   const openAdd = () => {
     setDraftName("");
     setDraftColor("#9A8B6E");
+    setDraftCategory("");
     setModal({ mode: "add" });
   };
 
   const openEdit = (tag: TagItem) => {
     setDraftName(tag.name);
     setDraftColor(tag.color ?? "#9A8B6E");
+    setDraftCategory(tag.category_id ?? "");
     setModal({ mode: "edit", tag });
   };
 
@@ -61,7 +65,7 @@ export default function AdminTags() {
         const res = await fetch("/api/admin/tags", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: draftName, color: draftColor }),
+          body: JSON.stringify({ name: draftName, color: draftColor, category_id: draftCategory || null }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -71,7 +75,7 @@ export default function AdminTags() {
         const res = await fetch(`/api/admin/tags/${modal.tag.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: draftName, color: draftColor }),
+          body: JSON.stringify({ name: draftName, color: draftColor, category_id: draftCategory || null }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -142,18 +146,23 @@ export default function AdminTags() {
               transition={{ delay: i * 0.03 }}
               className="flex items-center gap-4 px-5 py-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors"
             >
-              {/* Color dot */}
               <div
                 className="w-4 h-4 rounded-full flex-shrink-0 border border-black/10"
                 style={{ background: tag.color ?? "#9A8B6E" }}
               />
-              {/* Badge preview */}
               <span
                 className="font-sans text-xs font-semibold px-2.5 py-1 rounded-full"
                 style={{ background: (tag.color ?? "#9A8B6E") + "22", color: tag.color ?? "#9A8B6E", border: `1px solid ${tag.color ?? "#9A8B6E"}44` }}
               >
                 {tag.name}
               </span>
+              {tag.category_id ? (
+                <span className="font-sans text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  {CATEGORIES.find((c) => c.id === tag.category_id)?.shortName ?? tag.category_id}
+                </span>
+              ) : (
+                <span className="font-sans text-[10px] text-gray-300 italic">todas</span>
+              )}
               <span className="flex-1" />
               <button
                 onClick={() => openEdit(tag)}
@@ -199,11 +208,27 @@ export default function AdminTags() {
                     <input
                       value={draftName}
                       onChange={(e) => setDraftName(e.target.value)}
-                      placeholder="Ej: sin gluten, vegano, premium..."
+                      placeholder="Ej: Pollo, Ensaladas, sin gluten..."
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-sans text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-sage-400 transition-colors"
                       onKeyDown={(e) => e.key === "Enter" && save()}
                       autoFocus
                     />
+                  </div>
+
+                  <div>
+                    <label className="block font-sans text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                      Categoría
+                    </label>
+                    <select
+                      value={draftCategory}
+                      onChange={(e) => setDraftCategory(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-sans text-gray-700 focus:outline-none focus:border-sage-400 transition-colors"
+                    >
+                      <option value="">Todas las categorías</option>
+                      {CATEGORIES.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>

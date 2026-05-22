@@ -75,14 +75,11 @@ export default function EmpresasSection() {
               className="font-serif font-light text-4xl md:text-5xl text-white mb-4 leading-tight"
               style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
             >
-              Viandas para{" "}
+              Resolvemos de manera inteligente el almuerzo en tus colaboradores{" "}
               <em className="italic font-normal" style={{ color: "#D4B882" }}>
-                empresas
+                para que todos coman a su gusto
               </em>
             </h2>
-            <p className="font-sans text-white/60 text-base leading-relaxed mb-8 max-w-md">
-              Alimentá a tu equipo con comida real, nutritiva y deliciosa. Nos encargamos de todo para que vos te enfoques en lo importante.
-            </p>
 
             <ul className="space-y-3">
               {BENEFITS.map((b) => (

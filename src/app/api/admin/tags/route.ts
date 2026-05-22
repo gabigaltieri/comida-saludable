@@ -21,12 +21,12 @@ export async function POST(req: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const { name, color } = await req.json();
+  const { name, color, category_id } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Nombre requerido." }, { status: 400 });
 
   const { data, error } = await supabaseAdmin
     .from("tags")
-    .insert({ name: name.trim(), color: color ?? "#9A8B6E" })
+    .insert({ name: name.trim(), color: color ?? "#9A8B6E", category_id: category_id ?? null })
     .select()
     .single();
 

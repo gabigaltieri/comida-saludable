@@ -51,62 +51,32 @@ export async function POST(req: NextRequest) {
 
   // ── Armar email ───────────────────────────────────────────────────────────
   const subject = isEmpresas
-    ? `Nueva consulta empresas — ${empresa ?? nombre}`
-    : `Nueva consulta catering — ${nombre}`;
+    ? `Nueva consulta viandas empresas - ${nombre}`
+    : `Nueva consulta catering - ${nombre}`;
 
-  const html = isEmpresas
-    ? `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-        <div style="background:#2a402b;padding:24px 32px;border-radius:12px 12px 0 0">
-          <h1 style="color:white;margin:0;font-size:22px">🏢 Consulta Viandas para Empresas</h1>
-          <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:14px">262 Cosas Ricas</p>
-        </div>
-        <div style="background:#f9f9f7;padding:32px;border:1px solid #e0dbd4;border-top:none;border-radius:0 0 12px 12px">
-          <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px;width:180px">Nombre</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(nombre)}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Empresa</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(empresa ?? "—")}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Email</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#547d54"><a href="mailto:${esc(mail)}" style="color:#547d54">${esc(mail)}</a></td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Teléfono</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(telefono)}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Empleados</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(empleados ?? "—")}</td></tr>
-          </table>
-          ${detalle ? `
-          <div style="margin-top:20px">
-            <p style="color:#666;font-size:13px;margin:0 0 8px">Consulta</p>
-            <div style="background:white;border:1px solid #e0dbd4;border-radius:8px;padding:16px;color:#333;font-size:14px;line-height:1.6">${esc(detalle).replace(/\n/g, "<br>")}</div>
-          </div>` : ""}
-        </div>
-        <p style="color:#aaa;font-size:12px;text-align:center;margin-top:16px">262 Cosas Ricas · Tte. Gral. Eustoquio Frías 262, CABA</p>
+  const headerTitle = isEmpresas ? "Consulta Viandas para Empresas" : "Consulta Catering para Eventos";
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+      <div style="background:#2a402b;padding:24px 32px;border-radius:12px 12px 0 0">
+        <h2 style="color:white;margin:0;font-size:20px;font-weight:600">${headerTitle}</h2>
+        <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:13px">262 Cosas Ricas</p>
       </div>
-    `
-    : `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-        <div style="background:#2a402b;padding:24px 32px;border-radius:12px 12px 0 0">
-          <h1 style="color:white;margin:0;font-size:22px">🎉 Consulta Catering para Eventos</h1>
-          <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:14px">262 Cosas Ricas</p>
-        </div>
-        <div style="background:#f9f9f7;padding:32px;border:1px solid #e0dbd4;border-top:none;border-radius:0 0 12px 12px">
-          <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px;width:160px">Nombre</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(nombre)}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Email</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#547d54"><a href="mailto:${esc(mail)}" style="color:#547d54">${esc(mail)}</a></td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #ede9e3;color:#666;font-size:13px">Teléfono</td>
-                <td style="padding:10px 0;border-bottom:1px solid #ede9e3;font-weight:600;color:#1a1a1a">${esc(telefono)}</td></tr>
-          </table>
-          ${detalle ? `
-          <div style="margin-top:20px">
-            <p style="color:#666;font-size:13px;margin:0 0 8px">Consulta</p>
-            <div style="background:white;border:1px solid #e0dbd4;border-radius:8px;padding:16px;color:#333;font-size:14px;line-height:1.6">${esc(detalle).replace(/\n/g, "<br>")}</div>
-          </div>` : ""}
-        </div>
-        <p style="color:#aaa;font-size:12px;text-align:center;margin-top:16px">262 Cosas Ricas · Tte. Gral. Eustoquio Frías 262, CABA</p>
+      <div style="background:#f9f9f7;padding:32px;border:1px solid #e0dbd4;border-top:none;border-radius:0 0 12px 12px">
+        <p style="margin:0 0 4px;color:#666;font-size:12px">Nombre</p>
+        <p style="margin:0 0 16px;font-weight:600;color:#1a1a1a;font-size:14px">${esc(nombre)}</p>
+        <p style="margin:0 0 4px;color:#666;font-size:12px">Email</p>
+        <p style="margin:0 0 16px;font-size:14px"><a href="mailto:${esc(mail)}" style="color:#547d54">${esc(mail)}</a></p>
+        <p style="margin:0 0 4px;color:#666;font-size:12px">Telefono</p>
+        <p style="margin:0 0 16px;font-weight:600;color:#1a1a1a;font-size:14px">${esc(telefono)}</p>
+        ${detalle ? `
+        <p style="margin:0 0 4px;color:#666;font-size:12px">Mensaje</p>
+        <p style="margin:0;background:white;border:1px solid #e0dbd4;border-radius:8px;padding:14px;color:#333;font-size:14px;line-height:1.6">${esc(detalle).replace(/\n/g, "<br>")}</p>
+        ` : ""}
       </div>
-    `;
+      <p style="color:#aaa;font-size:11px;text-align:center;margin-top:16px">262 Cosas Ricas - Tte. Gral. Eustoquio Frias 262, CABA</p>
+    </div>
+  `;
 
   // ── Enviar email ──────────────────────────────────────────────────────────
   try {
@@ -119,8 +89,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      console.error("Resend error:", JSON.stringify(error));
-      // El dato ya quedó en Supabase; avisamos pero no fallamos el form
+      console.error("Resend error:", JSON.stringify(error), "| tipo:", tipo, "| subject:", subject);
       return NextResponse.json({ ok: true, emailWarning: true });
     }
 

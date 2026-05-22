@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   Loader2, Search, ChevronDown, CheckCircle2,
   Building2, CalendarDays, Mail, Phone, Users, MessageSquare,
+  Trash2, RefreshCw, AlertTriangle,
 } from "lucide-react";
 
 type Lead = {
@@ -47,6 +48,17 @@ export default function AdminLeads() {
   const [estadoLocal, setEstadoLocal] = useState<Record<number, Lead["estado"]>>({});
   const [saving, setSaving] = useState<number | null>(null);
   const [savedOk, setSavedOk] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchLeads = async () => {
+    setRefreshing(true);
+    const r = await fetch("/api/admin/leads");
+    const data = await r.json();
+    if (Array.isArray(data)) setLeads(data);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     fetch("/api/admin/leads")
@@ -82,6 +94,19 @@ export default function AdminLeads() {
     setTimeout(() => setSavedOk(null), 2000);
   };
 
+  const eliminar = async (id: number) => {
+    setDeleting(id);
+    await fetch("/api/admin/leads", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setLeads((prev) => prev.filter((l) => l.id !== id));
+    setExpanded(null);
+    setConfirmDelete(null);
+    setDeleting(null);
+  };
+
   const counts = {
     nuevo:      leads.filter((l) => l.estado === "nuevo").length,
     contactado: leads.filter((l) => l.estado === "contactado").length,
@@ -90,14 +115,24 @@ export default function AdminLeads() {
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl text-sage-800 mb-1"
-          style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}>
-          Consultas
-        </h1>
-        <p className="font-sans text-sm text-sage-500">
-          Formularios de contacto de empresas y catering.
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-3xl text-sage-800 mb-1"
+            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}>
+            Consultas
+          </h1>
+          <p className="font-sans text-sm text-sage-500">
+            Formularios de contacto de empresas y catering.
+          </p>
+        </div>
+        <button
+          onClick={fetchLeads}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-sage-200 bg-white font-sans text-sm text-sage-600 hover:bg-sage-50 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
+          Recargar
+        </button>
       </div>
 
       {/* Métricas rápidas */}
@@ -242,33 +277,64 @@ export default function AdminLeads() {
                           </div>
                         )}
 
-                        {/* Cambiar estado */}
-                        <div className="flex items-center gap-3 pt-1">
-                          <select
-                            value={pendingEstado ?? lead.estado}
-                            onChange={(e) =>
-                              setEstadoLocal((prev) => ({ ...prev, [lead.id]: e.target.value as Lead["estado"] }))
-                            }
-                            className="px-3 py-2 rounded-xl border border-sage-200 bg-white text-sm font-sans text-sage-700 focus:outline-none focus:border-sage-400"
-                          >
-                            {ESTADOS.map((e) => (
-                              <option key={e.value} value={e.value}>{e.label}</option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => guardar(lead.id)}
-                            disabled={!pendingEstado || saving === lead.id}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl font-sans text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5"
-                            style={{ background: "#2a402b" }}
-                          >
-                            {saving === lead.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : savedOk === lead.id ? (
-                              <><CheckCircle2 className="w-4 h-4" /> Guardado</>
-                            ) : (
-                              "Guardar cambio"
-                            )}
-                          </button>
+                        {/* Cambiar estado + eliminar */}
+                        <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <select
+                              value={pendingEstado ?? lead.estado}
+                              onChange={(e) =>
+                                setEstadoLocal((prev) => ({ ...prev, [lead.id]: e.target.value as Lead["estado"] }))
+                              }
+                              className="px-3 py-2 rounded-xl border border-sage-200 bg-white text-sm font-sans text-sage-700 focus:outline-none focus:border-sage-400"
+                            >
+                              {ESTADOS.map((e) => (
+                                <option key={e.value} value={e.value}>{e.label}</option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => guardar(lead.id)}
+                              disabled={!pendingEstado || saving === lead.id}
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl font-sans text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                              style={{ background: "#2a402b" }}
+                            >
+                              {saving === lead.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : savedOk === lead.id ? (
+                                <><CheckCircle2 className="w-4 h-4" /> Guardado</>
+                              ) : (
+                                "Guardar cambio"
+                              )}
+                            </button>
+                          </div>
+
+                          {/* Eliminar */}
+                          {confirmDelete === lead.id ? (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                              <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                              <span className="font-sans text-xs text-red-600">¿Eliminar?</span>
+                              <button
+                                onClick={() => eliminar(lead.id)}
+                                disabled={deleting === lead.id}
+                                className="font-sans text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+                              >
+                                {deleting === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Sí, eliminar"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmDelete(null)}
+                                className="font-sans text-xs text-sage-500 hover:text-sage-700 px-2 py-1 rounded-lg transition-colors"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDelete(lead.id)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 font-sans text-sm transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Eliminar
+                            </button>
+                          )}
                         </div>
                       </div>
                     </motion.div>

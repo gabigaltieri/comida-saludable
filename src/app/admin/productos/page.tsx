@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { CATEGORIES, Product, CategoryId } from "@/lib/data";
+import { Product, CategoryId } from "@/lib/data";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/db";
 import { formatPrice } from "@/lib/cart";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,11 +53,13 @@ function SortableRow({
   onEdit,
   onDelete,
   onToggle,
+  categories,
 }: {
   product: Product;
   onEdit: (p: Product) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, current: boolean) => void;
+  categories: CategoryItem[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: product.id });
@@ -69,7 +71,7 @@ function SortableRow({
     zIndex: isDragging ? 10 : undefined,
   };
 
-  const cat = CATEGORIES.find((c) => c.id === product.category);
+  const cat = categories.find((c) => c.slug === product.category);
 
   return (
     <tr
@@ -106,7 +108,7 @@ function SortableRow({
       </td>
       <td className="px-4 py-3.5">
         <span className="font-sans text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full whitespace-nowrap">
-          {cat?.emoji} {cat?.shortName}
+          {cat?.name ?? product.category}
         </span>
       </td>
       <td className="px-4 py-3.5 font-sans text-sm font-semibold text-gray-700 whitespace-nowrap">
@@ -254,11 +256,13 @@ function ImageDropZone({
 
 // ── Página principal ────────────────────────────────────────
 
-type TagItem = { id: number; name: string; color: string };
+type TagItem = { id: number; name: string; color: string; category_id?: string | null };
+type CategoryItem = { id: string; name: string; slug: string };
 
 export default function AdminProductos() {
   const [products, setProducts] = useState<Product[]>([]);
   const [availableTags, setAvailableTags] = useState<TagItem[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
@@ -280,10 +284,12 @@ export default function AdminProductos() {
     Promise.all([
       getProducts(),
       fetch("/api/admin/tags").then((r) => r.json()),
+      fetch("/api/admin/categories").then((r) => r.json()),
     ])
-      .then(([prods, tags]) => {
+      .then(([prods, tags, cats]) => {
         setProducts(prods);
         if (Array.isArray(tags)) setAvailableTags(tags);
+        if (Array.isArray(cats)) setAvailableCategories(cats.map((c: { id: string; name: string; slug: string }) => ({ id: c.id, name: c.name, slug: c.slug })));
       })
       .catch(() => showToast("Error al cargar datos", "err"))
       .finally(() => setLoading(false));
@@ -503,6 +509,7 @@ export default function AdminProductos() {
                       onEdit={openEdit}
                       onDelete={setDeleteConfirm}
                       onToggle={toggleAvailable}
+                      categories={availableCategories}
                     />
                   ))}
                 </>
@@ -577,9 +584,9 @@ export default function AdminProductos() {
                     </ModalField>
                     <ModalField label="Categoría">
                       <select value={draft.category}
-                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId }))}
+                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId, tags: [] }))}
                         className="input-admin">
-                        {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        {availableCategories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
                       </select>
                     </ModalField>
                   </div>
@@ -604,40 +611,45 @@ export default function AdminProductos() {
                     </ModalField>
                   </div>
                   <ModalField label="Etiquetas">
-                    {availableTags.length === 0 ? (
-                      <p className="font-sans text-xs text-gray-400 italic">
-                        No hay etiquetas creadas. Creá algunas en{" "}
-                        <a href="/admin/tags" target="_blank" className="underline text-sage-500">Etiquetas</a>.
-                      </p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {availableTags.map((tag) => {
-                          const selected = draft.tags.includes(tag.name);
-                          return (
-                            <button
-                              key={tag.id}
-                              type="button"
-                              onClick={() =>
-                                setDraft((d) => ({
-                                  ...d,
-                                  tags: selected
-                                    ? d.tags.filter((t) => t !== tag.name)
-                                    : [...d.tags, tag.name],
-                                }))
-                              }
-                              className="font-sans text-xs font-semibold px-3 py-1.5 rounded-full border-2 transition-all"
-                              style={
-                                selected
-                                  ? { background: tag.color, color: "white", borderColor: tag.color }
-                                  : { background: tag.color + "18", color: tag.color, borderColor: tag.color + "55" }
-                              }
-                            >
-                              {tag.name}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                    {(() => {
+                      const filtered = availableTags.filter(
+                        (t) => !t.category_id || t.category_id === draft.category
+                      );
+                      return filtered.length === 0 ? (
+                        <p className="font-sans text-xs text-gray-400 italic">
+                          No hay etiquetas para esta categoría. Creá algunas en{" "}
+                          <a href="/admin/tags" target="_blank" className="underline text-sage-500">Etiquetas</a>.
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {filtered.map((tag) => {
+                            const selected = draft.tags.includes(tag.name);
+                            return (
+                              <button
+                                key={tag.id}
+                                type="button"
+                                onClick={() =>
+                                  setDraft((d) => ({
+                                    ...d,
+                                    tags: selected
+                                      ? d.tags.filter((t) => t !== tag.name)
+                                      : [...d.tags, tag.name],
+                                  }))
+                                }
+                                className="font-sans text-xs font-semibold px-3 py-1.5 rounded-full border-2 transition-all"
+                                style={
+                                  selected
+                                    ? { background: tag.color, color: "white", borderColor: tag.color }
+                                    : { background: tag.color + "18", color: tag.color, borderColor: tag.color + "55" }
+                                }
+                              >
+                                {tag.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </ModalField>
                   <div className="flex gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">

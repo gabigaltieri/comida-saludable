@@ -13,47 +13,7 @@ export interface Product {
   available: boolean;
 }
 
-export type CategoryId = "viandas-diarias" | "viandas-congeladas" | "ensaladas-tartas";
-
-export interface Category {
-  id: CategoryId;
-  name: string;
-  shortName: string;
-  description: string;
-  image: string;
-  imageAlt: string;
-  emoji: string;
-}
-
-export const CATEGORIES: Category[] = [
-  {
-    id: "viandas-diarias",
-    name: "Viandas Diarias",
-    shortName: "Diarias",
-    description: "Menús frescos y nutritivos preparados cada día con ingredientes de temporada.",
-    image: "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80",
-    imageAlt: "Vianda diaria saludable con proteína, verduras y cereales integrales",
-    emoji: "🥘",
-  },
-  {
-    id: "viandas-congeladas",
-    name: "Viandas Congeladas",
-    shortName: "Congeladas",
-    description: "Preparaciones listas para calentar. Tenés comida casera siempre a mano.",
-    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
-    imageAlt: "Viandas congeladas saludables listas para calentar en microondas",
-    emoji: "❄️",
-  },
-  {
-    id: "ensaladas-tartas",
-    name: "Ensaladas & Tartas",
-    shortName: "Frescas",
-    description: "Ensaladas completas y tartas integrales. Ideales para el almuerzo en el trabajo.",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
-    imageAlt: "Ensalada fresca colorida con vegetales de temporada y proteína",
-    emoji: "🥗",
-  },
-];
+export type CategoryId = string;
 
 export const PRODUCTS: Product[] = [
   // Viandas Diarias

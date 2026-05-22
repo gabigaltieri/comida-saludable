@@ -8,12 +8,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const { name, color } = await req.json();
+  const { name, color, category_id } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Nombre requerido." }, { status: 400 });
 
   const { data, error } = await supabaseAdmin
     .from("tags")
-    .update({ name: name.trim(), color })
+    .update({ name: name.trim(), color, category_id: category_id ?? null })
     .eq("id", params.id)
     .select()
     .single();

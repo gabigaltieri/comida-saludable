@@ -7,6 +7,7 @@ import Categories from "@/components/sections/Categories";
 import MenuSection from "@/components/sections/MenuSection";
 import AboutSection from "@/components/sections/AboutSection";
 import EmpresasSection from "@/components/sections/EmpresasSection";
+import CateringSection from "@/components/sections/CateringSection";
 import HowToOrder from "@/components/sections/HowToOrder";
 import Reviews from "@/components/sections/Reviews";
 import LocationSection from "@/components/sections/LocationSection";
@@ -25,6 +26,7 @@ export default function HomePage() {
           <MenuSection />
           <HowToOrder />
           <EmpresasSection />
+          <CateringSection />
           <LocationSection />
           <Reviews />
           <AboutSection />
