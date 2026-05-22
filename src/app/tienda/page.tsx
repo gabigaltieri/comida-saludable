@@ -10,7 +10,6 @@ import Image from "next/image";
 import { Loader2, MessageCircle, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/cart";
-import Image from "next/image";
 
 // ── Tipos de Supabase ────────────────────────────────────────────────────────
 
