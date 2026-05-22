@@ -303,11 +303,12 @@ export default function TiendaPage() {
             src={bannerUrl}
             alt="Banner tienda"
             fill
-            className="object-cover opacity-40"
+            className="object-cover"
             sizes="100vw"
             priority
           />
         )}
+        <div className="absolute inset-0 bg-black/50" />
         <div
           className="absolute inset-0 opacity-20"
           style={{ backgroundImage: "radial-gradient(circle at 70% 50%, #9A8B6E 0%, transparent 60%)" }}
