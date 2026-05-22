@@ -93,47 +93,47 @@ function ViewOnlyCard({ product }: { product: Product }) {
 
 function DiariasBanner() {
   return (
-    <div className="max-w-6xl mx-auto px-5 md:px-8 pt-6">
+    <div className="relative z-10 max-w-4xl mx-auto px-5 md:px-8 -mt-7">
       <div
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-5 py-4"
-        style={{ background: "white", border: "1px solid #e5e0d8" }}
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-4 shadow-lg"
+        style={{ background: "white" }}
       >
-      <p
-        className="font-serif font-light text-lg md:text-xl leading-snug"
-        style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#5a6b3a" }}
-      >
-        Vení a buscar tus opciones saludables de mediodía
-      </p>
-      <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-sans text-sm font-medium text-white transition-all hover:scale-105"
-          style={{ background: "#25D366" }}
+        <p
+          className="font-serif font-light text-lg md:text-xl leading-snug text-center sm:text-left"
+          style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#5a6b3a" }}
         >
-          <MessageCircle className="w-4 h-4" />
-          WhatsApp
-        </a>
-        <div
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-sans text-sm font-medium border cursor-default"
-          style={{ background: "#f5f5f5", borderColor: "#ddd", color: "#888" }}
-        >
-          <span>🛵</span>
-          PedidosYa
-          <span className="text-[10px] bg-sage-100 text-sage-600 font-semibold px-1.5 py-0.5 rounded-full">pronto</span>
+          Vení a buscar tus opciones saludables de mediodía
+        </p>
+        <div className="flex items-center gap-2 flex-wrap justify-center flex-shrink-0">
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium text-white transition-all hover:scale-105"
+            style={{ background: "#25D366" }}
+          >
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
+          </a>
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium border cursor-default"
+            style={{ background: "#f5f5f5", borderColor: "#ddd", color: "#aaa" }}
+          >
+            <span>🛵</span>
+            PedidosYa
+            <span className="text-[10px] bg-gray-100 text-gray-400 font-semibold px-1.5 py-0.5 rounded-full">pronto</span>
+          </div>
+          <a
+            href="https://www.rappi.com.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium border transition-all hover:scale-105"
+            style={{ background: "#fff3f0", borderColor: "#ffd0c5", color: "#e05d44" }}
+          >
+            <span>🛵</span>
+            Rappi
+          </a>
         </div>
-        <a
-          href="https://www.rappi.com.ar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-sans text-sm font-medium border transition-all hover:scale-105"
-          style={{ background: "#fff3f0", borderColor: "#ffd0c5", color: "#e05d44" }}
-        >
-          <span>🛵</span>
-          Rappi
-        </a>
-      </div>
       </div>
     </div>
   );
@@ -335,6 +335,8 @@ export default function TiendaPage() {
           </motion.p>
         </div>
       </div>
+
+      <DiariasBanner />
 
       <main className="max-w-6xl mx-auto px-5 md:px-8 py-12">
         {loading ? (
