@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart, formatPrice } from "@/lib/cart";
-import { CATEGORIES, WHATSAPP_NUMBER, Product } from "@/lib/data";
+import { WHATSAPP_NUMBER, Product } from "@/lib/data";
 import { getProducts } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import StoreNavbar from "@/components/StoreNavbar";
@@ -40,7 +40,6 @@ function ProductDetail({ productId }: { productId: string }) {
 
   const product = allProducts.find((p) => p.id === productId);
   const cartItem = items.find((i) => i.product.id === product?.id);
-  const category = CATEGORIES.find((c) => c.id === product?.category);
   const photos = product
     ? [product.image, product.image2, product.image3].filter(Boolean) as string[]
     : [];
@@ -122,7 +121,7 @@ function ProductDetail({ productId }: { productId: string }) {
           </Link>
           <ChevronRight className="w-3 h-3 flex-shrink-0" />
           <Link href="/tienda" className="hover:text-sage-600 transition-colors">
-            {category?.name}
+            Tienda
           </Link>
           <ChevronRight className="w-3 h-3 flex-shrink-0" />
           <span className="text-sage-600 font-medium truncate max-w-[160px]">
@@ -205,7 +204,7 @@ function ProductDetail({ productId }: { productId: string }) {
           >
             {/* Category tag */}
             <p className="font-sans text-xs uppercase tracking-[0.22em] text-sage-400 mb-3">
-              {category?.emoji} {category?.name}
+              {product.category.replace(/-/g, " ")}
             </p>
 
             {/* Title */}

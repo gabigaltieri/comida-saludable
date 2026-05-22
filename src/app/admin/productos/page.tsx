@@ -530,6 +530,7 @@ export default function AdminProductos() {
                         onEdit={openEdit}
                         onDelete={setDeleteConfirm}
                         onToggle={toggleAvailable}
+                        categories={availableCategories}
                       />
                     ))}
                   </SortableContext>

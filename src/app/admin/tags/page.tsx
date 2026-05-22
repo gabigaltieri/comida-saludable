@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Plus, Pencil, Trash2, X, Save, Loader2, CheckCircle2, XCircle, Tag } from "lucide-react";
-import { CATEGORIES } from "@/lib/data";
 
 type TagItem = { id: number; name: string; color: string; category_id?: string | null };
+type CategoryItem = { id: string; name: string; slug: string };
 
 const PRESET_COLORS = [
   "#9A8B6E", "#547d54", "#2a402b", "#D4B882",
@@ -16,6 +16,7 @@ const PRESET_COLORS = [
 
 export default function AdminTags() {
   const [tags, setTags] = useState<TagItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
 
@@ -35,9 +36,14 @@ export default function AdminTags() {
   };
 
   const load = async () => {
-    const res = await fetch("/api/admin/tags");
-    const data = await res.json();
-    if (Array.isArray(data)) setTags(data);
+    const [tagsRes, catsRes] = await Promise.all([
+      fetch("/api/admin/tags"),
+      fetch("/api/admin/categories"),
+    ]);
+    const tagsData = await tagsRes.json();
+    const catsData = await catsRes.json();
+    if (Array.isArray(tagsData)) setTags(tagsData);
+    if (Array.isArray(catsData)) setCategories(catsData);
     setLoading(false);
   };
 
@@ -158,7 +164,7 @@ export default function AdminTags() {
               </span>
               {tag.category_id ? (
                 <span className="font-sans text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {CATEGORIES.find((c) => c.id === tag.category_id)?.shortName ?? tag.category_id}
+                  {categories.find((c) => c.id === tag.category_id)?.name ?? tag.category_id}
                 </span>
               ) : (
                 <span className="font-sans text-[10px] text-gray-300 italic">todas</span>
@@ -225,7 +231,7 @@ export default function AdminTags() {
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-sans text-gray-700 focus:outline-none focus:border-sage-400 transition-colors"
                     >
                       <option value="">Todas las categorías</option>
-                      {CATEGORIES.map((c) => (
+                      {categories.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </select>

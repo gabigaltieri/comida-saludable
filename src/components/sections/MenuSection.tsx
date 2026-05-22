@@ -3,25 +3,21 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
-import { PRODUCTS, CATEGORIES, CategoryId } from "@/lib/data";
+import { PRODUCTS } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 
-const ALL = "all";
-
 export default function MenuSection({ initialCategory }: { initialCategory?: string }) {
-  const [activeCategory, setActiveCategory] = useState<string>(initialCategory ?? ALL);
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialCategory) {
-      setActiveCategory(initialCategory);
       sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [initialCategory]);
 
   const filtered = PRODUCTS.filter((p) => {
-    const matchesCat = activeCategory === ALL || p.category === activeCategory;
+    const matchesCat = !initialCategory || p.category === initialCategory;
     const matchesSearch =
       !searchQuery ||
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -29,11 +25,6 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
       p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCat && matchesSearch;
   });
-
-  const filterTabs = [
-    { id: ALL, label: "Todo el menú", emoji: "🌿" },
-    ...CATEGORIES.map((c) => ({ id: c.id, label: c.name, emoji: c.emoji })),
-  ];
 
   return (
     <section id="menu" ref={sectionRef} className="py-20 md:py-28 bg-cream-100">
@@ -76,35 +67,10 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
           </motion.div>
         </div>
 
-        {/* Category filter tabs */}
-        <motion.div
-          className="flex gap-2 overflow-x-auto pb-3 mb-10 scrollbar-hide"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-        >
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveCategory(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium whitespace-nowrap transition-all duration-300 flex-shrink-0 ${
-                activeCategory === tab.id
-                  ? "bg-sage-500 text-white shadow-[0_4px_16px_rgba(84,125,84,0.30)]"
-                  : "bg-white text-sage-600 border border-sage-200 hover:border-sage-400 hover:bg-sage-50"
-              }`}
-            >
-              <span>{tab.emoji}</span>
-              {tab.label}
-            </button>
-          ))}
-        </motion.div>
-
         {/* Products Grid */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeCategory + searchQuery}
+            key={searchQuery}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
