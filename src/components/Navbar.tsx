@@ -36,7 +36,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
   return (
     <>
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "bg-cream-100/95 backdrop-blur-md shadow-[0_1px_30px_rgba(84,125,84,0.10)]"
             : "bg-black/40 backdrop-blur-sm"

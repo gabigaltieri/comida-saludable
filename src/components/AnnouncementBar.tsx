@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Megaphone, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { X, Megaphone } from "lucide-react";
 import Link from "next/link";
 
 type Announcement = { text: string; color: string; link: string | null; active: boolean };
@@ -18,6 +19,7 @@ const COLOR_MAP: Record<string, { bg: string; text: string }> = {
 };
 
 export default function AnnouncementBar() {
+  const pathname = usePathname();
   const [data, setData] = useState<Announcement | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -27,35 +29,68 @@ export default function AnnouncementBar() {
       .then((d) => { if (d.active && d.text) setData(d); });
   }, []);
 
+  if (pathname?.startsWith("/admin")) return null;
   if (!data || dismissed) return null;
 
   const colors = COLOR_MAP[data.color] ?? COLOR_MAP["green"];
+  const segments = data.text.split("|").map((s) => s.trim()).filter(Boolean);
 
-  const content = (
+  const ticker = (
     <div
-      className="w-full flex items-center justify-center gap-2 py-2 px-4 text-sm font-sans font-medium relative"
-      style={{ background: colors.bg, color: colors.text }}
+      className="flex animate-marquee whitespace-nowrap"
+      style={{ animationDuration: "20s" }}
     >
-      <Megaphone className="w-3.5 h-3.5 flex-shrink-0" />
-      <span>{data.text}</span>
-      <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDismissed(true); }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity"
-        style={{ color: colors.text }}
-        aria-label="Cerrar"
-      >
-        <X className="w-3.5 h-3.5" />
-      </button>
+      {[0, 1].map((i) => (
+        <div key={i} className="flex items-center flex-shrink-0">
+          {segments.map((seg, j) => (
+            <span
+              key={j}
+              className="flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-[0.18em] px-10"
+            >
+              <Megaphone className="w-3 h-3 flex-shrink-0 opacity-60" />
+              {seg}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+  const dismissBtn = (
+    <button
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDismissed(true); }}
+      className="absolute right-0 top-0 bottom-0 flex items-center px-4 opacity-50 hover:opacity-100 transition-opacity z-10"
+      style={{ color: colors.text, background: `linear-gradient(to right, transparent, ${colors.bg} 40%)` }}
+      aria-label="Cerrar"
+    >
+      <X className="w-3.5 h-3.5" />
+    </button>
+  );
+
+  const containerClass = "sticky top-0 left-0 right-0 z-[60] w-full overflow-hidden";
+
+  const inner = (
+    <div className="relative py-2" style={{ background: colors.bg, color: colors.text }}>
+      {ticker}
+      {dismissBtn}
     </div>
   );
 
   if (data.link) {
     const isExternal = data.link.startsWith("http");
     if (isExternal) {
-      return <a href={data.link} target="_blank" rel="noopener noreferrer" className="block w-full hover:opacity-90 transition-opacity">{content}</a>;
+      return (
+        <a href={data.link} target="_blank" rel="noopener noreferrer" className={`${containerClass} block`}>
+          {inner}
+        </a>
+      );
     }
-    return <Link href={data.link} className="block w-full hover:opacity-90 transition-opacity">{content}</Link>;
+    return (
+      <Link href={data.link} className={`${containerClass} block`}>
+        {inner}
+      </Link>
+    );
   }
 
-  return <div className="w-full">{content}</div>;
+  return <div className={containerClass}>{inner}</div>;
 }
