@@ -594,15 +594,16 @@ export default function ViandaSlugPage({
                       pronto
                     </span>
                   </button>
-                  <button
-                    disabled
-                    className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-sans font-medium opacity-50 cursor-not-allowed"
+                  <a
+                    href="https://www.rappi.com.ar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-sans font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm"
                     style={{ background: "#FF441B" }}
                   >
                     <ExternalLink className="w-4 h-4" />
                     Rappi
-                    <span className="text-[10px] font-semibold bg-red-300 text-red-700 px-1.5 py-0.5 rounded-full">pronto</span>
-                  </button>
+                  </a>
                 </div>
               </div>
             )}
