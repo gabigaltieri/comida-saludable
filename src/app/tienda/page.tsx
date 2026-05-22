@@ -94,8 +94,8 @@ function ViewOnlyCard({ product }: { product: Product }) {
 function DiariasBanner() {
   return (
     <div
-      className="flex flex-col sm:flex-row items-center justify-between gap-5 rounded-2xl px-6 py-5 mb-10"
-      style={{ background: "white", border: "1px solid #e5e0d8" }}
+      className="flex flex-col sm:flex-row items-center justify-between gap-5 px-6 py-5"
+      style={{ background: "white", borderBottom: "1px solid #e5e0d8" }}
     >
       <p
         className="font-serif font-light text-xl md:text-2xl leading-snug max-w-sm"
@@ -122,14 +122,16 @@ function DiariasBanner() {
           PedidosYa
           <span className="text-[10px] bg-sage-100 text-sage-600 font-semibold px-1.5 py-0.5 rounded-full">pronto</span>
         </div>
-        <div
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-sans text-sm font-medium border cursor-default"
+        <a
+          href="https://www.rappi.com.ar"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-sans text-sm font-medium border transition-all hover:scale-105"
           style={{ background: "#fff3f0", borderColor: "#ffd0c5", color: "#e05d44" }}
         >
           <span>🛵</span>
           Rappi
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "#ffe0d8", color: "#e05d44" }}>pronto</span>
-        </div>
+        </a>
       </div>
     </div>
   );
@@ -196,7 +198,6 @@ function CategorySection({
   isFirst: boolean;
 }) {
   const showCart = category.has_cart === true;
-  const showBanner = category.slug?.toLowerCase().includes("diaria") ?? false;
   const accentColor = showCart ? "#D4B882" : "#e05d44";
   const labelColor = showCart ? "#547d54" : "#e05d44";
 
@@ -233,9 +234,6 @@ function CategorySection({
         </h2>
         <div className="h-px mb-8" style={{ background: `linear-gradient(to right, ${labelColor}, transparent)` }} />
       </motion.div>
-
-      {/* Banner especial para viandas diarias */}
-      {showBanner && <DiariasBanner />}
 
       {/* Subcategorías */}
       {category.subcategories.length > 0 ? (
@@ -295,6 +293,7 @@ export default function TiendaPage() {
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
       <StoreNavbar />
+      <DiariasBanner />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>
