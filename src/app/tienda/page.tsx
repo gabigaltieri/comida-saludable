@@ -194,8 +194,8 @@ function CategorySection({
   products: Product[];
   isFirst: boolean;
 }) {
-  const showCart = category.slug === "viandas-congeladas";
-  const showBanner = category.slug === "viandas-diarias";
+  const showCart = category.slug?.toLowerCase().includes("congelad") ?? false;
+  const showBanner = category.slug?.toLowerCase().includes("diaria") ?? false;
   const accentColor = showCart ? "#D4B882" : "#e05d44";
   const labelColor = showCart ? "#547d54" : "#e05d44";
 
