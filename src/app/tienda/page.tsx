@@ -35,6 +35,7 @@ type CategoryDB = {
 // ── Matching productos → subcategoría ────────────────────────────────────────
 
 function matchesSubcat(p: Product, subcat: SubcategoryDB): boolean {
+  if (p.subcategory_id) return p.subcategory_id === subcat.id;
   const hay = (p.name + " " + p.tags.join(" ")).toLowerCase();
   const keywords = [subcat.slug, subcat.name.toLowerCase()].filter(Boolean);
   return keywords.some((kw) => hay.includes(kw));

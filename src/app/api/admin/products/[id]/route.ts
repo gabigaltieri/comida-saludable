@@ -16,6 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (body.image2 !== undefined) payload.image2 = body.image2 || null;
   if (body.image3 !== undefined) payload.image3 = body.image3 || null;
   if (body.imageAlt !== undefined) payload.image_alt = body.imageAlt;
+  if (body.subcategory_id !== undefined) payload.subcategory_id = body.subcategory_id || null;
   if (body.tags !== undefined) payload.tags = body.tags;
   if (body.featured !== undefined) payload.featured = body.featured;
   if (body.available !== undefined) payload.available = body.available;

@@ -37,6 +37,7 @@ const EMPTY_DRAFT: ProductDraft = {
   description: "",
   price: 0,
   category: "viandas-diarias",
+  subcategory_id: "",
   image: "",
   image2: "",
   image3: "",
@@ -257,7 +258,8 @@ function ImageDropZone({
 // ── Página principal ────────────────────────────────────────
 
 type TagItem = { id: number; name: string; color: string; category_id?: string | null };
-type CategoryItem = { id: string; name: string; slug: string };
+type SubcatItem = { id: string; name: string; slug: string };
+type CategoryItem = { id: string; name: string; slug: string; subcategories: SubcatItem[] };
 
 export default function AdminProductos() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -284,12 +286,14 @@ export default function AdminProductos() {
     Promise.all([
       getProducts(),
       fetch("/api/admin/tags").then((r) => r.json()),
-      fetch("/api/admin/categories").then((r) => r.json()),
+      fetch("/api/categories").then((r) => r.json()),
     ])
       .then(([prods, tags, cats]) => {
         setProducts(prods);
         if (Array.isArray(tags)) setAvailableTags(tags);
-        if (Array.isArray(cats)) setAvailableCategories(cats.map((c: { id: string; name: string; slug: string }) => ({ id: c.id, name: c.name, slug: c.slug })));
+        if (Array.isArray(cats)) setAvailableCategories(cats.map((c: CategoryItem) => ({
+          id: c.id, name: c.name, slug: c.slug, subcategories: c.subcategories ?? [],
+        })));
       })
       .catch(() => showToast("Error al cargar datos", "err"))
       .finally(() => setLoading(false));
@@ -585,7 +589,7 @@ export default function AdminProductos() {
                     </ModalField>
                     <ModalField label="Categoría">
                       <select value={draft.category}
-                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId, tags: [] }))}
+                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId, subcategory_id: "", tags: [] }))}
                         className="input-admin">
                         {availableCategories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
                       </select>
@@ -611,40 +615,34 @@ export default function AdminProductos() {
                       />
                     </ModalField>
                   </div>
-                  <ModalField label="Etiquetas">
+                  <ModalField label="Subcategoría">
                     {(() => {
-                      const filtered = availableTags.filter(
-                        (t) => !t.category_id || t.category_id === draft.category
-                      );
-                      return filtered.length === 0 ? (
+                      const currentCat = availableCategories.find((c) => c.slug === draft.category);
+                      const subcats = currentCat?.subcategories ?? [];
+                      return subcats.length === 0 ? (
                         <p className="font-sans text-xs text-gray-400 italic">
-                          No hay etiquetas para esta categoría. Creá algunas en{" "}
-                          <a href="/admin/tags" target="_blank" className="underline text-sage-500">Etiquetas</a>.
+                          Esta categoría no tiene subcategorías. Creá una en{" "}
+                          <a href="/admin/categorias" target="_blank" className="underline text-sage-500">Categorías</a>.
                         </p>
                       ) : (
                         <div className="flex flex-wrap gap-2">
-                          {filtered.map((tag) => {
-                            const selected = draft.tags.includes(tag.name);
+                          {subcats.map((sub) => {
+                            const selected = draft.subcategory_id === sub.id;
                             return (
                               <button
-                                key={tag.id}
+                                key={sub.id}
                                 type="button"
                                 onClick={() =>
-                                  setDraft((d) => ({
-                                    ...d,
-                                    tags: selected
-                                      ? d.tags.filter((t) => t !== tag.name)
-                                      : [...d.tags, tag.name],
-                                  }))
+                                  setDraft((d) => ({ ...d, subcategory_id: selected ? "" : sub.id }))
                                 }
-                                className="font-sans text-xs font-semibold px-3 py-1.5 rounded-full border-2 transition-all"
-                                style={
+                                className={cn(
+                                  "font-sans text-xs font-semibold px-3 py-1.5 rounded-full border-2 transition-all",
                                   selected
-                                    ? { background: tag.color, color: "white", borderColor: tag.color }
-                                    : { background: tag.color + "18", color: tag.color, borderColor: tag.color + "55" }
-                                }
+                                    ? "bg-sage-500 text-white border-sage-500"
+                                    : "bg-sage-50 text-sage-600 border-sage-200 hover:border-sage-400"
+                                )}
                               >
-                                {tag.name}
+                                {sub.name}
                               </button>
                             );
                           })}

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       image2: body.image2 || null,
       image3: body.image3 || null,
       image_alt: body.imageAlt,
+      subcategory_id: body.subcategory_id || null,
       tags: body.tags,
       featured: body.featured ?? false,
       available: body.available,

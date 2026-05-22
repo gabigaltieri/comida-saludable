@@ -14,6 +14,7 @@ function toProduct(row: Record<string, unknown>): Product {
     image2: (row.image2 as string) || undefined,
     image3: (row.image3 as string) || undefined,
     imageAlt: row.image_alt as string,
+    subcategory_id: (row.subcategory_id as string) || undefined,
     tags: (row.tags as string[]) ?? [],
     featured: row.featured as boolean,
     available: row.available as boolean,
