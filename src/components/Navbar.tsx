@@ -110,7 +110,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
 
             {/* User auth */}
             {user ? (
-              <div className="relative hidden md:block">
+              <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen((v) => !v)}
                   className={`flex items-center p-2.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${scrolled ? "bg-sage-100 hover:bg-sage-200 text-sage-700" : "bg-white/20 hover:bg-white/30 text-white"}`}
@@ -147,7 +147,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
             ) : (
               <button
                 onClick={openAuthModal}
-                className={`hidden md:flex items-center p-2.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${scrolled ? "bg-sage-100 hover:bg-sage-200 text-sage-700" : "bg-white/20 hover:bg-white/30 text-white"}`}
+                className={`flex items-center p-2.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${scrolled ? "bg-sage-100 hover:bg-sage-200 text-sage-700" : "bg-white/20 hover:bg-white/30 text-white"}`}
                 aria-label="Iniciar sesión"
               >
                 <UserCircle2 className="w-5 h-5" />
@@ -197,32 +197,45 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-x-0 top-16 z-40 bg-cream-100/98 backdrop-blur-md border-b border-sage-100 shadow-lg md:hidden"
+            className="fixed inset-x-0 top-16 z-40 md:hidden shadow-xl"
+            style={{ background: "#fdf9f3" }}
           >
-            <ul className="flex flex-col p-6 gap-1">
+            {/* franja decorativa superior */}
+            <div className="h-1 w-full bg-gradient-to-r from-sage-300 via-sage-500 to-sage-300" />
+
+            <div className="px-6 pt-5 pb-2">
+              <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-sage-400">
+                262 Cosas Ricas
+              </p>
+            </div>
+
+            <ul className="flex flex-col px-6 pb-4 gap-0">
               {navLinks.map((link, i) => (
                 <motion.li
                   key={link.href}
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.06 }}
+                  className="border-b border-sage-100 last:border-0"
                 >
                   {link.href.startsWith("/") ? (
                     <Link
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
-                      className="block py-3 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors"
+                      className="flex items-center gap-3 py-3.5 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors group"
                       style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                     >
+                      <span className="w-1 h-5 rounded-full bg-sage-300 group-hover:bg-sage-500 transition-colors flex-shrink-0" />
                       {link.label}
                     </Link>
                   ) : (
                     <a
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
-                      className="block py-3 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors"
+                      className="flex items-center gap-3 py-3.5 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors group"
                       style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                     >
+                      <span className="w-1 h-5 rounded-full bg-sage-300 group-hover:bg-sage-500 transition-colors flex-shrink-0" />
                       {link.label}
                     </a>
                   )}
@@ -232,33 +245,36 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: navLinks.length * 0.06 }}
+                className="border-b border-sage-100"
               >
                 <Link
                   href="/tienda"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 py-3 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors"
+                  className="flex items-center gap-3 py-3.5 font-serif text-2xl text-sage-800 hover:text-sage-500 transition-colors group"
                   style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                 >
+                  <span className="w-1 h-5 rounded-full bg-sage-300 group-hover:bg-sage-500 transition-colors flex-shrink-0" />
                   Tienda
                 </Link>
               </motion.li>
-              <motion.li
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: (navLinks.length + 1) * 0.06 }}
-                className="pt-4 border-t border-sage-100"
-              >
-                <a
-                  href="https://instagram.com/262.cosasricas"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-sage-500"
-                >
-                  <Instagram className="w-4 h-4" />
-                  {INSTAGRAM_HANDLE}
-                </a>
-              </motion.li>
             </ul>
+
+            {/* footer del menu */}
+            <div className="px-6 py-4 flex items-center justify-between border-t border-sage-100">
+              <a
+                href="https://instagram.com/262.cosasricas"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-sage-500 hover:text-sage-700 transition-colors"
+              >
+                <Instagram className="w-4 h-4" />
+                {INSTAGRAM_HANDLE}
+              </a>
+              <div className="flex items-center gap-1.5">
+                <Leaf className="w-3.5 h-3.5 text-sage-400" />
+                <span className="font-sans text-[10px] text-sage-400 tracking-wide">Comida saludable</span>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
