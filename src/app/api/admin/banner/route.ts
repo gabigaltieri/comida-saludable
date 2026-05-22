@@ -4,17 +4,22 @@ import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+const VALID_IDS = ["tienda-hero", "home-hero"];
+
+export async function GET(req: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
+
+  const id = req.nextUrl.searchParams.get("id") ?? "tienda-hero";
+  if (!VALID_IDS.includes(id)) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
 
   const { data } = await supabaseAdmin
     .from("banners")
     .select("*")
-    .eq("id", "tienda-hero")
+    .eq("id", id)
     .single();
 
-  return NextResponse.json(data ?? { id: "tienda-hero", image_url: null, active: true });
+  return NextResponse.json(data ?? { id, image_url: null, active: true });
 }
 
 export async function PATCH(req: NextRequest) {
@@ -22,7 +27,10 @@ export async function PATCH(req: NextRequest) {
   if (authError) return authError;
 
   const body = await req.json();
-  const payload: Record<string, unknown> = { id: "tienda-hero", updated_at: new Date().toISOString() };
+  const id = body.id ?? "tienda-hero";
+  if (!VALID_IDS.includes(id)) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+
+  const payload: Record<string, unknown> = { id, updated_at: new Date().toISOString() };
   if (body.image_url !== undefined) payload.image_url = body.image_url || null;
   if (body.active !== undefined) payload.active = body.active;
 

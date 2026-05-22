@@ -1,12 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, MessageCircle } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/data";
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1547592180-85f173990554?w=1600&q=90";
+
 export default function Hero() {
+  const [bgImage, setBgImage] = useState(FALLBACK_IMAGE);
+
+  useEffect(() => {
+    fetch("/api/banner?id=home-hero")
+      .then((r) => r.json())
+      .then((d) => { if (d.active && d.image_url) setBgImage(d.image_url); });
+  }, []);
+
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     "¡Hola! Me gustaría saber más sobre sus viandas 🌿"
   )}`;
@@ -17,7 +28,7 @@ export default function Hero() {
       {/* Background image */}
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1600&q=90"
+          src={bgImage}
           alt="Viandas saludables caseras 262 Cosas Ricas"
           fill
           className="object-cover"
