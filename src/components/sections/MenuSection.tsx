@@ -2,13 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search } from "lucide-react";
-import { PRODUCTS } from "@/lib/data";
+import { Search, Loader2 } from "lucide-react";
+import { Product } from "@/lib/data";
+import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 
 export default function MenuSection({ initialCategory }: { initialCategory?: string }) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getProducts().then(setProducts).finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (initialCategory) {
@@ -16,7 +23,7 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
     }
   }, [initialCategory]);
 
-  const filtered = PRODUCTS.filter((p) => {
+  const filtered = products.filter((p) => {
     const matchesCat = !initialCategory || p.category === initialCategory;
     const matchesSearch =
       !searchQuery ||
@@ -68,8 +75,13 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
         </div>
 
         {/* Products Grid */}
+        {loading && (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-7 h-7 text-sage-400 animate-spin" />
+          </div>
+        )}
         <AnimatePresence mode="wait">
-          <motion.div
+          {!loading && <motion.div
             key={searchQuery}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -99,7 +111,7 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
                 ))}
               </div>
             )}
-          </motion.div>
+          </motion.div>}
         </AnimatePresence>
 
         {/* Bottom note */}
