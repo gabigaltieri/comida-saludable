@@ -9,7 +9,7 @@ import { Product } from "@/lib/data";
 import { useCart, formatPrice } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, showCart = true }: { product: Product; showCart?: boolean }) {
   const { addItem, items, openCart } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -125,28 +125,30 @@ export default function ProductCard({ product }: { product: Product }) {
             </p>
           </div>
 
-          <motion.button
-            onClick={handleAdd}
-            disabled={!product.available}
-            className={cn(
-              "flex items-center gap-2 rounded-full px-4 py-2.5 font-sans text-sm font-medium transition-all duration-300",
-              justAdded
-                ? "bg-sage-500 text-white scale-95"
-                : "bg-sage-100 text-sage-700 hover:bg-sage-500 hover:text-white hover:scale-105",
-              !product.available && "opacity-40 cursor-not-allowed"
-            )}
-            whileTap={{ scale: 0.92 }}
-          >
-            <motion.span
-              key={justAdded ? "check" : "plus"}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.18 }}
+          {showCart && (
+            <motion.button
+              onClick={handleAdd}
+              disabled={!product.available}
+              className={cn(
+                "flex items-center gap-2 rounded-full px-4 py-2.5 font-sans text-sm font-medium transition-all duration-300",
+                justAdded
+                  ? "bg-sage-500 text-white scale-95"
+                  : "bg-sage-100 text-sage-700 hover:bg-sage-500 hover:text-white hover:scale-105",
+                !product.available && "opacity-40 cursor-not-allowed"
+              )}
+              whileTap={{ scale: 0.92 }}
             >
-              {justAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            </motion.span>
-            {justAdded ? "¡Listo!" : "Agregar"}
-          </motion.button>
+              <motion.span
+                key={justAdded ? "check" : "plus"}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.18 }}
+              >
+                {justAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              </motion.span>
+              {justAdded ? "¡Listo!" : "Agregar"}
+            </motion.button>
+          )}
         </div>
       </div>
     </motion.article>
