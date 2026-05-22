@@ -179,7 +179,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
 
             {/* Mobile hamburger */}
             <button
-              className="md:hidden p-2 text-sage-700"
+              className={`md:hidden p-2.5 rounded-full transition-all duration-300 ${scrolled ? "bg-sage-100 text-sage-700" : "bg-white/20 text-white"}`}
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Menu"
             >
