@@ -18,6 +18,7 @@ import {
   Users,
   Tag,
   ImageIcon,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/admin/leads", label: "Consultas", icon: Users },
   { href: "/admin/tags", label: "Etiquetas", icon: Tag },
   { href: "/admin/banner", label: "Banner", icon: ImageIcon },
+  { href: "/admin/anuncio", label: "Anuncio", icon: Megaphone },
 ];
 
 function Sidebar({ onLogout, mobile, onClose }: { onLogout: () => void; mobile?: boolean; onClose?: () => void }) {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import AnnouncementBar from "@/components/AnnouncementBar";
 
 export const viewport: Viewport = {
   themeColor: "#547d54",
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body style={{
         fontFamily: "'DM Sans', system-ui, sans-serif",
       }}>
+        <AnnouncementBar />
         <Providers>{children}</Providers>
         <WhatsAppButton />
       </body>
