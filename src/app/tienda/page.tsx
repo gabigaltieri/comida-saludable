@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Loader2, MessageCircle, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/cart";
+import Image from "next/image";
 
 // ── Tipos de Supabase ────────────────────────────────────────────────────────
 
@@ -277,15 +278,18 @@ function CategorySection({
 export default function TiendaPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       getProducts(),
       fetch("/api/categories").then((r) => r.json()),
-    ]).then(([prods, cats]) => {
+      fetch("/api/banner").then((r) => r.json()),
+    ]).then(([prods, cats, banner]) => {
       setProducts(prods);
       if (Array.isArray(cats)) setCategories(cats);
+      if (banner?.active && banner?.image_url) setBannerUrl(banner.image_url);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -295,6 +299,16 @@ export default function TiendaPage() {
 
       {/* Hero */}
       <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>
+        {bannerUrl && (
+          <Image
+            src={bannerUrl}
+            alt="Banner tienda"
+            fill
+            className="object-cover opacity-40"
+            sizes="100vw"
+            priority
+          />
+        )}
         <div
           className="absolute inset-0 opacity-20"
           style={{ backgroundImage: "radial-gradient(circle at 70% 50%, #9A8B6E 0%, transparent 60%)" }}

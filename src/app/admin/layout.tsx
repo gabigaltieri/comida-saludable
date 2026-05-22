@@ -17,6 +17,7 @@ import {
   Layers,
   Users,
   Tag,
+  ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/admin/pedidos", label: "Pedidos", icon: ClipboardList },
   { href: "/admin/leads", label: "Consultas", icon: Users },
   { href: "/admin/tags", label: "Etiquetas", icon: Tag },
+  { href: "/admin/banner", label: "Banner", icon: ImageIcon },
 ];
 
 function Sidebar({ onLogout, mobile, onClose }: { onLogout: () => void; mobile?: boolean; onClose?: () => void }) {
