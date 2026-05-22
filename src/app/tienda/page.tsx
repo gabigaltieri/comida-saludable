@@ -29,6 +29,7 @@ type CategoryDB = {
   emoji: string;
   sort_order: number;
   active: boolean;
+  has_cart: boolean;
   subcategories: SubcategoryDB[];
 };
 
@@ -194,7 +195,7 @@ function CategorySection({
   products: Product[];
   isFirst: boolean;
 }) {
-  const showCart = category.slug?.toLowerCase().includes("congelad") ?? false;
+  const showCart = category.has_cart === true;
   const showBanner = category.slug?.toLowerCase().includes("diaria") ?? false;
   const accentColor = showCart ? "#D4B882" : "#e05d44";
   const labelColor = showCart ? "#547d54" : "#e05d44";
