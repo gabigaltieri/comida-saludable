@@ -15,7 +15,7 @@ const SPECS = [
   { label: "Tamaño recomendado", value: "1920 × 600 px" },
   { label: "Relación de aspecto", value: "3:1 (horizontal)" },
   { label: "Formatos aceptados", value: "JPG, PNG, WebP" },
-  { label: "Peso máximo", value: "3 MB" },
+  { label: "Peso máximo", value: "15 MB" },
 ];
 
 export default function AdminBanner() {
@@ -44,8 +44,8 @@ export default function AdminBanner() {
       showToast("Solo se aceptan imágenes (JPG, PNG, WebP)", "err");
       return;
     }
-    if (file.size > 3 * 1024 * 1024) {
-      showToast("La imagen supera el límite de 3 MB", "err");
+    if (file.size > 15 * 1024 * 1024) {
+      showToast("La imagen supera el límite de 15 MB", "err");
       return;
     }
     setUploading(true);
@@ -220,7 +220,7 @@ export default function AdminBanner() {
             <p className="font-sans text-sm font-medium text-gray-500 mb-1">
               {uploading ? "Subiendo imagen..." : "Arrastrá una imagen o hacé click"}
             </p>
-            <p className="font-sans text-xs text-gray-400">JPG, PNG o WebP · Máx. 3 MB · Mín. 1200 × 400 px</p>
+            <p className="font-sans text-xs text-gray-400">JPG, PNG o WebP · Máx. 15 MB · Mín. 1200 × 400 px</p>
           </div>
         )}
       </div>
