@@ -95,9 +95,11 @@ function ProductDetail({ productId }: { productId: string }) {
     openCart();
   };
 
+  const activePrice = product.on_sale && product.sale_price ? product.sale_price : product.price;
+
   const handleWhatsApp = () => {
     const msg = encodeURIComponent(
-      `¡Hola! Me interesa:\n*${product.name}* x${quantity}\nTotal: ${formatPrice(product.price * quantity)}\n\n¿Está disponible?`
+      `¡Hola! Me interesa:\n*${product.name}* x${quantity}\nTotal: ${formatPrice(activePrice * quantity)}\n\n¿Está disponible?`
     );
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
   };
@@ -229,14 +231,34 @@ function ProductDetail({ productId }: { productId: string }) {
             </p>
 
             {/* Price */}
-            <div className="flex items-baseline gap-2.5 mb-7">
-              <span
-                className="font-serif text-5xl font-semibold text-sage-700"
-                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
-              >
-                {formatPrice(product.price)}
-              </span>
-              <span className="font-sans text-sm text-sage-400">por unidad</span>
+            <div className="flex items-baseline gap-2.5 mb-7 flex-wrap">
+              {product.on_sale && product.sale_price ? (
+                <>
+                  <span
+                    className="font-serif text-5xl font-semibold text-red-500"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+                  >
+                    {formatPrice(product.sale_price)}
+                  </span>
+                  <span
+                    className="font-serif text-3xl text-gray-400 line-through"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+                  >
+                    {formatPrice(product.price)}
+                  </span>
+                  <span className="font-sans text-sm text-sage-400">por unidad</span>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="font-serif text-5xl font-semibold text-sage-700"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+                  >
+                    {formatPrice(product.price)}
+                  </span>
+                  <span className="font-sans text-sm text-sage-400">por unidad</span>
+                </>
+              )}
             </div>
 
             <div className="h-px bg-sage-100 mb-6" />
@@ -272,7 +294,7 @@ function ProductDetail({ productId }: { productId: string }) {
                     className="font-serif text-xl text-sage-700 font-semibold"
                     style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                   >
-                    {formatPrice(product.price * quantity)}
+                    {formatPrice(activePrice * quantity)}
                   </span>
                 </motion.p>
               )}

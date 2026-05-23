@@ -122,8 +122,11 @@ export function useCartState(): CartState {
       .forEach((k) => localStorage.removeItem(k));
   }, []);
 
+  const effectivePrice = (product: Product) =>
+    product.on_sale && product.sale_price ? product.sale_price : product.price;
+
   const total =
-    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) +
+    items.reduce((sum, item) => sum + effectivePrice(item.product) * item.quantity, 0) +
     comboItems.reduce((sum, item) => sum + item.combo.price * item.quantity, 0);
   const itemCount =
     items.reduce((sum, item) => sum + item.quantity, 0) +
@@ -133,7 +136,7 @@ export function useCartState(): CartState {
     if (items.length === 0 && comboItems.length === 0) return;
 
     const productLines = items.map(
-      (item) => `• ${item.quantity}x ${item.product.name} – $${(item.product.price * item.quantity).toLocaleString("es-AR")}`
+      (item) => `• ${item.quantity}x ${item.product.name} – $${(effectivePrice(item.product) * item.quantity).toLocaleString("es-AR")}`
     );
     const comboLines = comboItems.map((item) => {
       const detail = item.combo.description ? `\n   (${item.combo.description})` : "";

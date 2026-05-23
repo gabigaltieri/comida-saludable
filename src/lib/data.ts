@@ -3,6 +3,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  sale_price?: number;
+  on_sale?: boolean;
   category: CategoryId;
   subcategory_id?: string;
   image: string;

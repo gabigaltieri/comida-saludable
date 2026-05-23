@@ -24,18 +24,6 @@ export default function ProductCard({ product, showCart = true }: { product: Pro
     openCart();
   };
 
-  const tagColors: Record<string, string> = {
-    "sin gluten": "bg-amber-50 text-amber-700 border-amber-200",
-    vegano: "bg-sage-50 text-sage-700 border-sage-200",
-    vegetariano: "bg-green-50 text-green-700 border-green-200",
-    proteína: "bg-blue-50 text-blue-700 border-blue-200",
-    "omega-3": "bg-cyan-50 text-cyan-700 border-cyan-200",
-    premium: "bg-purple-50 text-purple-700 border-purple-200",
-    artesanal: "bg-orange-50 text-orange-700 border-orange-200",
-    gourmet: "bg-rose-50 text-rose-700 border-rose-200",
-    "sin lactosa": "bg-sky-50 text-sky-700 border-sky-200",
-  };
-
   return (
     <motion.article
       className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_40px_rgba(84,125,84,0.14)] transition-all duration-500 hover:-translate-y-1 flex flex-col"
@@ -83,21 +71,6 @@ export default function ProductCard({ product, showCart = true }: { product: Pro
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4 gap-3">
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {product.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className={cn(
-                "font-sans text-[10px] px-2 py-0.5 rounded-full border font-medium",
-                tagColors[tag] ?? "bg-sage-50 text-sage-600 border-sage-200"
-              )}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
         {/* Name & Description */}
         <div className="flex-1">
           <Link href={`/tienda/${product.id}`}>
@@ -117,12 +90,26 @@ export default function ProductCard({ product, showCart = true }: { product: Pro
         <div className="flex items-center justify-between gap-3 mt-auto pt-2 border-t border-sage-100">
           <div>
             <p className="font-sans text-xs text-sage-400 leading-none mb-0.5">Precio</p>
-            <p
-              className="font-serif text-sage-700 text-2xl font-semibold"
-              style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
-            >
-              {formatPrice(product.price)}
-            </p>
+            {product.on_sale && product.sale_price ? (
+              <div className="flex items-baseline gap-2">
+                <p
+                  className="font-serif text-red-500 text-2xl font-semibold"
+                  style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+                >
+                  {formatPrice(product.sale_price)}
+                </p>
+                <p className="font-sans text-sm text-gray-400 line-through">
+                  {formatPrice(product.price)}
+                </p>
+              </div>
+            ) : (
+              <p
+                className="font-serif text-sage-700 text-2xl font-semibold"
+                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+              >
+                {formatPrice(product.price)}
+              </p>
+            )}
           </div>
 
           {showCart && (

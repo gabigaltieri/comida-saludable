@@ -36,6 +36,8 @@ const EMPTY_DRAFT: ProductDraft = {
   name: "",
   description: "",
   price: 0,
+  sale_price: undefined,
+  on_sale: false,
   category: "viandas-diarias",
   subcategory_id: "",
   image: "",
@@ -112,8 +114,15 @@ function SortableRow({
           {cat?.name ?? product.category}
         </span>
       </td>
-      <td className="px-4 py-3.5 font-sans text-sm font-semibold text-gray-700 whitespace-nowrap">
-        {formatPrice(product.price)}
+      <td className="px-4 py-3.5 whitespace-nowrap">
+        {product.on_sale && product.sale_price ? (
+          <div className="flex flex-col gap-0.5">
+            <span className="font-sans text-sm font-semibold text-red-600">{formatPrice(product.sale_price)}</span>
+            <span className="font-sans text-xs text-gray-400 line-through">{formatPrice(product.price)}</span>
+          </div>
+        ) : (
+          <span className="font-sans text-sm font-semibold text-gray-700">{formatPrice(product.price)}</span>
+        )}
       </td>
       <td className="px-4 py-3.5">
         <button
@@ -257,13 +266,11 @@ function ImageDropZone({
 
 // ── Página principal ────────────────────────────────────────
 
-type TagItem = { id: number; name: string; color: string; category_id?: string | null };
 type SubcatItem = { id: string; name: string; slug: string };
 type CategoryItem = { id: string; name: string; slug: string; subcategories: SubcatItem[] };
 
 export default function AdminProductos() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [availableTags, setAvailableTags] = useState<TagItem[]>([]);
   const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -285,12 +292,10 @@ export default function AdminProductos() {
   useEffect(() => {
     Promise.all([
       getProducts(),
-      fetch("/api/admin/tags").then((r) => r.json()),
       fetch("/api/categories").then((r) => r.json()),
     ])
-      .then(([prods, tags, cats]) => {
+      .then(([prods, cats]) => {
         setProducts(prods);
-        if (Array.isArray(tags)) setAvailableTags(tags);
         if (Array.isArray(cats)) setAvailableCategories(cats.map((c: CategoryItem) => ({
           id: c.id, name: c.name, slug: c.slug, subcategories: c.subcategories ?? [],
         })));
@@ -589,7 +594,7 @@ export default function AdminProductos() {
                     </ModalField>
                     <ModalField label="Categoría">
                       <select value={draft.category}
-                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId, subcategory_id: "", tags: [] }))}
+                        onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as CategoryId, subcategory_id: "" }))}
                         className="input-admin">
                         {availableCategories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
                       </select>
@@ -650,6 +655,45 @@ export default function AdminProductos() {
                       );
                     })()}
                   </ModalField>
+                  {/* Precio en oferta */}
+                  <div className="rounded-xl border border-gray-200 p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans text-sm font-semibold text-gray-700">Precio en oferta</p>
+                        <p className="font-sans text-xs text-gray-400">El precio normal aparecerá tachado</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDraft((d) => ({ ...d, on_sale: !d.on_sale }))}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none",
+                          draft.on_sale ? "bg-red-500" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                            draft.on_sale ? "translate-x-6" : "translate-x-1"
+                          )}
+                        />
+                      </button>
+                    </div>
+                    {draft.on_sale && (
+                      <div>
+                        <label className="block font-sans text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                          Precio de oferta (ARS) *
+                        </label>
+                        <input
+                          type="number"
+                          value={draft.sale_price || ""}
+                          onChange={(e) => setDraft((d) => ({ ...d, sale_price: Number(e.target.value) || undefined }))}
+                          className="input-admin"
+                          placeholder="Ej: 5500"
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={draft.available}

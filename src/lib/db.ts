@@ -9,6 +9,8 @@ function toProduct(row: Record<string, unknown>): Product {
     name: row.name as string,
     description: row.description as string,
     price: Number(row.price),
+    sale_price: row.sale_price != null ? Number(row.sale_price) : undefined,
+    on_sale: (row.on_sale as boolean) ?? false,
     category: row.category as CategoryId,
     image: row.image as string,
     image2: (row.image2 as string) || undefined,

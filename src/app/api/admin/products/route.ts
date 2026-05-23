@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
       tags: body.tags,
       featured: body.featured ?? false,
       available: body.available,
+      sale_price: body.sale_price ?? null,
+      on_sale: body.on_sale ?? false,
     })
     .select()
     .single();

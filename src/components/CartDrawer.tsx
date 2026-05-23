@@ -131,7 +131,15 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                             {item.product.name}
                           </p>
                           <p className="font-sans text-sage-500 text-xs mt-0.5">
-                            {formatPrice(item.product.price)} c/u
+                            {item.product.on_sale && item.product.sale_price ? (
+                              <>
+                                <span className="text-red-500 font-semibold">{formatPrice(item.product.sale_price)}</span>
+                                {" "}<span className="line-through">{formatPrice(item.product.price)}</span>
+                                {" "}c/u
+                              </>
+                            ) : (
+                              <>{formatPrice(item.product.price)} c/u</>
+                            )}
                           </p>
 
                           <div className="flex items-center justify-between mt-2">
@@ -159,7 +167,7 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                                 className="font-serif text-sage-700 font-semibold text-lg"
                                 style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                               >
-                                {formatPrice(item.product.price * item.quantity)}
+                                {formatPrice((item.product.on_sale && item.product.sale_price ? item.product.sale_price : item.product.price) * item.quantity)}
                               </p>
                               <button
                                 onClick={() => removeItem(item.product.id)}

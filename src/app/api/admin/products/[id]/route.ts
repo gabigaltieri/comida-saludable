@@ -20,6 +20,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (body.tags !== undefined) payload.tags = body.tags;
   if (body.featured !== undefined) payload.featured = body.featured;
   if (body.available !== undefined) payload.available = body.available;
+  if (body.sale_price !== undefined) payload.sale_price = body.sale_price ?? null;
+  if (body.on_sale !== undefined) payload.on_sale = body.on_sale;
 
   const { data, error } = await supabaseAdmin
     .from("products")
