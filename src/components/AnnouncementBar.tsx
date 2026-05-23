@@ -38,19 +38,21 @@ export default function AnnouncementBar() {
   const ticker = (
     <div
       className="flex animate-marquee whitespace-nowrap"
-      style={{ animationDuration: "20s" }}
+      style={{ animationDuration: "30s" }}
     >
       {[0, 1].map((i) => (
         <div key={i} className="flex items-center flex-shrink-0">
-          {segments.map((seg, j) => (
-            <span
-              key={j}
-              className="flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-[0.18em] px-10"
-            >
-              <Megaphone className="w-3 h-3 flex-shrink-0 opacity-60" />
-              {seg}
-            </span>
-          ))}
+          {Array.from({ length: 8 }).flatMap((_, rep) =>
+            segments.map((seg, j) => (
+              <span
+                key={`${rep}-${j}`}
+                className="flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-[0.18em] px-10"
+              >
+                <Megaphone className="w-3 h-3 flex-shrink-0 opacity-60" />
+                {seg}
+              </span>
+            ))
+          )}
         </div>
       ))}
     </div>
