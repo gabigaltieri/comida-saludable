@@ -35,26 +35,25 @@ export default function AnnouncementBar() {
   const colors = COLOR_MAP[data.color] ?? COLOR_MAP["green"];
   const segments = data.text.split("|").map((s) => s.trim()).filter(Boolean);
 
-  const ticker = (
+  // Each track is min 100vw wide → total div is min 200vw → translateX(-50%) = -100vw → always covers viewport
+  const track = (key: number) => (
     <div
-      className="flex animate-marquee whitespace-nowrap"
-      style={{ animationDuration: "30s" }}
+      key={key}
+      className="flex items-center flex-shrink-0"
+      style={{ minWidth: "100vw" }}
+      aria-hidden={key > 0 ? true : undefined}
     >
-      {[0, 1].map((i) => (
-        <div key={i} className="flex items-center flex-shrink-0">
-          {Array.from({ length: 8 }).flatMap((_, rep) =>
-            segments.map((seg, j) => (
-              <span
-                key={`${rep}-${j}`}
-                className="flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-[0.18em] px-10"
-              >
-                <Megaphone className="w-3 h-3 flex-shrink-0 opacity-60" />
-                {seg}
-              </span>
-            ))
-          )}
-        </div>
-      ))}
+      {Array.from({ length: 10 }).flatMap((_, rep) =>
+        segments.map((seg, j) => (
+          <span
+            key={`${rep}-${j}`}
+            className="flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-[0.18em] px-8"
+          >
+            <Megaphone className="w-3 h-3 flex-shrink-0 opacity-60" />
+            {seg}
+          </span>
+        ))
+      )}
     </div>
   );
 
@@ -69,14 +68,17 @@ export default function AnnouncementBar() {
     </button>
   );
 
-  const containerClass = "sticky top-0 left-0 right-0 z-[60] w-full overflow-hidden";
-
   const inner = (
-    <div className="relative py-2" style={{ background: colors.bg, color: colors.text }}>
-      {ticker}
+    <div className="relative overflow-hidden py-2" style={{ background: colors.bg, color: colors.text }}>
+      <div className="flex animate-marquee whitespace-nowrap" style={{ animationDuration: "25s" }}>
+        {track(0)}
+        {track(1)}
+      </div>
       {dismissBtn}
     </div>
   );
+
+  const containerClass = "sticky top-0 left-0 right-0 z-[60] w-full";
 
   if (data.link) {
     const isExternal = data.link.startsWith("http");
