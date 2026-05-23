@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Product, WHATSAPP_NUMBER } from "@/lib/data";
 import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { Loader2, MessageCircle, ShoppingBag } from "lucide-react";
@@ -294,7 +293,6 @@ export default function TiendaPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-      <StoreNavbar />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>

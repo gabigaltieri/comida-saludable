@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   Send,
 } from "lucide-react";
-import StoreNavbar from "@/components/StoreNavbar";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { Product, WHATSAPP_NUMBER } from "@/lib/data";
@@ -439,7 +438,6 @@ export default function ViandaSlugPage({
   if (loading) {
     return (
       <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-        <StoreNavbar />
         <div className="flex justify-center items-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 text-sage-400 animate-spin" />
         </div>
@@ -451,7 +449,6 @@ export default function ViandaSlugPage({
   if (notFound || !category) {
     return (
       <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-        <StoreNavbar />
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-5 text-center">
           <p className="text-5xl mb-4">🥘</p>
           <h1
@@ -552,7 +549,6 @@ export default function ViandaSlugPage({
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-      <StoreNavbar />
 
       {heroContent}
 

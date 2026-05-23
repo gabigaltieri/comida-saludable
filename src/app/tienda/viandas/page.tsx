@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Loader2, ChevronRight, Gift } from "lucide-react";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 
 interface CategoryItem {
@@ -62,7 +61,6 @@ export default function ViandasyPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-      <StoreNavbar />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>

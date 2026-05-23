@@ -1,12 +1,10 @@
 import Link from "next/link";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import { XCircle, ShoppingBag, ArrowLeft } from "lucide-react";
 
 export default function CheckoutFailurePage() {
   return (
     <div className="min-h-screen bg-cream-100">
-      <StoreNavbar />
 
       <div className="max-w-xl mx-auto px-5 py-24 flex flex-col items-center text-center">
         <div className="w-24 h-24 rounded-full bg-salmon-100 flex items-center justify-center mb-6">

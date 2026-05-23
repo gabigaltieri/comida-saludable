@@ -8,7 +8,6 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { getProducts } from "@/lib/db";
 import { useCart } from "@/lib/cart";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { Product } from "@/lib/data";
@@ -118,7 +117,6 @@ function ArmatuComboContent() {
 
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-      <StoreNavbar />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-16 md:py-20 px-5" style={{ background: "#1E1E1E" }}>

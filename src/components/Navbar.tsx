@@ -37,12 +37,11 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
     <>
       {/* Plain header handles sticky + CSS-var top — no Framer Motion on the sticky element */}
       <header
-        className={`sticky left-0 right-0 z-50 transition-all duration-500 ${
+        className={`transition-all duration-500 ${
           scrolled
             ? "bg-cream-100/95 backdrop-blur-md shadow-[0_1px_30px_rgba(84,125,84,0.10)]"
             : "bg-black/40 backdrop-blur-sm"
         }`}
-        style={{ top: "var(--announcement-h, 0px)" }}
       >
         <motion.div
           className="max-w-6xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between"

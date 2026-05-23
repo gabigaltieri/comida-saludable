@@ -105,7 +105,7 @@ export default function AnnouncementBar() {
     </div>
   );
 
-  const containerClass = "sticky top-0 left-0 right-0 z-[60] w-full";
+  const containerClass = "w-full";
 
   if (data.link) {
     const isExternal = data.link.startsWith("http");

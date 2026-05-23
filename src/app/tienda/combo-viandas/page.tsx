@@ -18,7 +18,6 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/cart";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import { Product } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -144,7 +143,6 @@ function ComboViandasContent() {
 
   return (
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
-      <StoreNavbar />
 
       {/* Hero */}
       <div className="relative overflow-hidden py-14 md:py-20 px-5" style={{ background: "#1E1E1E" }}>

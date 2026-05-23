@@ -7,7 +7,6 @@ import { useCart, formatPrice } from "@/lib/cart";
 import { WHATSAPP_NUMBER, Product } from "@/lib/data";
 import { getProducts } from "@/lib/db";
 import { cn } from "@/lib/utils";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,7 +54,6 @@ function ProductDetail({ productId }: { productId: string }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-cream-100">
-        <StoreNavbar />
         <div className="flex items-center justify-center py-32">
           <Loader2 className="w-8 h-8 text-sage-400 animate-spin" />
         </div>
@@ -67,7 +65,6 @@ function ProductDetail({ productId }: { productId: string }) {
   if (!product) {
     return (
       <div className="min-h-screen bg-cream-100">
-        <StoreNavbar />
         <div className="flex flex-col items-center justify-center py-32 text-center px-5">
           <p className="text-5xl mb-4">😔</p>
           <h1
@@ -107,7 +104,6 @@ function ProductDetail({ productId }: { productId: string }) {
 
   return (
     <div className="min-h-screen bg-cream-100">
-      <StoreNavbar />
 
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-5 md:px-8 py-4">

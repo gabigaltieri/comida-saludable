@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useCart, formatPrice } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { WHATSAPP_NUMBER } from "@/lib/data";
-import StoreNavbar from "@/components/StoreNavbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -904,7 +903,6 @@ function CPField({
 export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-cream-100">
-        <StoreNavbar />
 
         {/* Page header */}
         <div className="bg-sage-600 text-white py-10 px-5">

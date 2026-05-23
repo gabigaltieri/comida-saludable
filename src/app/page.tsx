@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
+import AnnouncementBar from "@/components/AnnouncementBar";
 import Hero from "@/components/sections/Hero";
 import Categories from "@/components/sections/Categories";
 import MenuSection from "@/components/sections/MenuSection";
@@ -18,7 +19,10 @@ export default function HomePage() {
   const [cartOpen, setCartOpen] = useState(false);
   return (
     <div className="min-h-screen">
-        <Navbar onCartOpen={() => setCartOpen(true)} />
+        <div className="sticky top-0 z-50">
+          <AnnouncementBar />
+          <Navbar onCartOpen={() => setCartOpen(true)} />
+        </div>
 
         <main>
           <Hero />
