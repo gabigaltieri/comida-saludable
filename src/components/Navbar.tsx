@@ -35,18 +35,21 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
 
   return (
     <>
-      <motion.header
+      {/* Plain header handles sticky + CSS-var top — no Framer Motion on the sticky element */}
+      <header
         className={`sticky left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "bg-cream-100/95 backdrop-blur-md shadow-[0_1px_30px_rgba(84,125,84,0.10)]"
             : "bg-black/40 backdrop-blur-sm"
         }`}
         style={{ top: "var(--announcement-h, 0px)" }}
-        initial={{ y: -80 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <nav className="max-w-6xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
+        <motion.div
+          className="max-w-6xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between"
+          initial={{ y: -80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center group-hover:bg-sage-600 transition-colors">
@@ -100,7 +103,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
               Tienda
             </Link>
             <a
-              href={`https://instagram.com/262.cosasricas`}
+              href="https://instagram.com/262.cosasricas"
               target="_blank"
               rel="noopener noreferrer"
               className={`hidden md:flex items-center gap-1.5 transition-colors duration-300 hover:text-salmon-400 ${scrolled ? "text-sage-600" : "text-white/80"}`}
@@ -187,8 +190,8 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-        </nav>
-      </motion.header>
+        </motion.div>
+      </header>
 
       {/* Mobile Menu */}
       <AnimatePresence>
@@ -198,8 +201,8 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-x-0 top-16 z-40 md:hidden shadow-xl"
-            style={{ background: "#fdf9f3" }}
+            className="fixed inset-x-0 z-40 md:hidden shadow-xl"
+            style={{ top: "calc(var(--announcement-h, 0px) + 64px)", background: "#fdf9f3" }}
           >
             {/* franja decorativa superior */}
             <div className="h-1 w-full bg-gradient-to-r from-sage-300 via-sage-500 to-sage-300" />
