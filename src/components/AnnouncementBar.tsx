@@ -22,8 +22,7 @@ export default function AnnouncementBar() {
   const pathname = usePathname();
   const [data, setData] = useState<Announcement | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const barRef = useRef<any>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/announcement")
@@ -111,13 +110,13 @@ export default function AnnouncementBar() {
     const isExternal = data.link.startsWith("http");
     if (isExternal) {
       return (
-        <a ref={barRef } href={data.link} target="_blank" rel="noopener noreferrer" className={`${containerClass} block`}>
+        <a ref={barRef as unknown as React.Ref<HTMLAnchorElement>} href={data.link} target="_blank" rel="noopener noreferrer" className={`${containerClass} block`}>
           {inner}
         </a>
       );
     }
     return (
-      <Link ref={barRef } href={data.link} className={`${containerClass} block`}>
+      <Link ref={barRef as unknown as React.Ref<HTMLAnchorElement>} href={data.link} className={`${containerClass} block`}>
         {inner}
       </Link>
     );
