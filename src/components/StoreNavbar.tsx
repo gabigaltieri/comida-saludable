@@ -20,7 +20,7 @@ export default function StoreNavbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-cream-100/95 backdrop-blur-md border-b border-sage-100 shadow-sm">
+      <header className="sticky z-50 bg-cream-100/95 backdrop-blur-md border-b border-sage-100 shadow-sm" style={{ top: "var(--announcement-h, 0px)" }}>
         <nav className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center group-hover:bg-sage-600 transition-colors">

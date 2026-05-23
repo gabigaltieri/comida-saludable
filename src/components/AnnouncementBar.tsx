@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { X, Megaphone } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ export default function AnnouncementBar() {
   const pathname = usePathname();
   const [data, setData] = useState<Announcement | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/announcement")
@@ -29,8 +30,33 @@ export default function AnnouncementBar() {
       .then((d) => { if (d.active && d.text) setData(d); });
   }, []);
 
-  if (pathname?.startsWith("/admin")) return null;
-  if (!data || dismissed) return null;
+  // Sincroniza la altura de la barra como variable CSS para que el Navbar la use como top offset
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) {
+      document.documentElement.style.setProperty("--announcement-h", "0px");
+      return;
+    }
+    const update = () => {
+      document.documentElement.style.setProperty("--announcement-h", el.offsetHeight + "px");
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.setProperty("--announcement-h", "0px");
+    };
+  }, [data, dismissed]);
+
+  const isAdmin = pathname?.startsWith("/admin");
+  if (isAdmin || !data || dismissed) {
+    // Asegurar que la variable quede en 0 si no se muestra
+    if (typeof document !== "undefined") {
+      document.documentElement.style.setProperty("--announcement-h", "0px");
+    }
+    return null;
+  }
 
   const colors = COLOR_MAP[data.color] ?? COLOR_MAP["green"];
   const segments = data.text.split("|").map((s) => s.trim()).filter(Boolean);
@@ -84,17 +110,17 @@ export default function AnnouncementBar() {
     const isExternal = data.link.startsWith("http");
     if (isExternal) {
       return (
-        <a href={data.link} target="_blank" rel="noopener noreferrer" className={`${containerClass} block`}>
+        <a ref={barRef as React.Ref<HTMLAnchorElement>} href={data.link} target="_blank" rel="noopener noreferrer" className={`${containerClass} block`}>
           {inner}
         </a>
       );
     }
     return (
-      <Link href={data.link} className={`${containerClass} block`}>
+      <Link ref={barRef as React.Ref<HTMLAnchorElement>} href={data.link} className={`${containerClass} block`}>
         {inner}
       </Link>
     );
   }
 
-  return <div className={containerClass}>{inner}</div>;
+  return <div ref={barRef} className={containerClass}>{inner}</div>;
 }

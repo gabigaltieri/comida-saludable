@@ -14,13 +14,13 @@ export async function POST(req: NextRequest) {
   }
 
   const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-  const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+  const MAX_IMAGE_BYTES = 15 * 1024 * 1024; // 15 MB
 
   if (!ALLOWED_IMAGE_MIME.includes(file.type)) {
     return NextResponse.json({ error: "Solo se aceptan imágenes JPEG, PNG, WebP o GIF." }, { status: 400 });
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return NextResponse.json({ error: "La imagen no puede superar 10 MB." }, { status: 400 });
+    return NextResponse.json({ error: "La imagen no puede superar 15 MB." }, { status: 400 });
   }
 
   const ext = file.name.split(".").pop() ?? "jpg";
