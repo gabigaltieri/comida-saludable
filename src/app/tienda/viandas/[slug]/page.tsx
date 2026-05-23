@@ -385,6 +385,15 @@ function ContactFormCatering() {
   );
 }
 
+// ─── Matching producto → subcategoría ────────────────────────────────────────
+
+function matchesSubcat(p: Product, subcat: Subcategory): boolean {
+  if (p.subcategory_id) return p.subcategory_id === subcat.id;
+  const hay = (p.name + " " + (p.tags ?? []).join(" ")).toLowerCase();
+  const keywords = [subcat.slug, subcat.name.toLowerCase()].filter(Boolean);
+  return keywords.some((kw) => hay.includes(kw));
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ViandaSlugPage({
@@ -604,7 +613,7 @@ export default function ViandaSlugPage({
               </div>
             )}
 
-            {/* Grid de productos */}
+            {/* Grid de productos — agrupado por subcategorías si existen */}
             {displayProducts.length === 0 ? (
               <div className="text-center py-24">
                 <p className="text-5xl mb-4">🥘</p>
@@ -618,7 +627,76 @@ export default function ViandaSlugPage({
                   Estamos preparando el menú. ¡Volvé pronto!
                 </p>
               </div>
+            ) : category && category.subcategories.length > 0 ? (
+              // Con subcategorías: mostrar título por grupo
+              <div className="flex flex-col gap-12">
+                {category.subcategories.map((sub, si) => {
+                  const subcatProducts = displayProducts.filter((p) => matchesSubcat(p, sub));
+                  if (subcatProducts.length === 0) return null;
+                  return (
+                    <motion.div
+                      key={sub.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: si * 0.08 }}
+                    >
+                      <h2
+                        className="font-serif font-light text-3xl md:text-4xl mb-6 pb-3 border-b border-sage-200"
+                        style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
+                      >
+                        {sub.name}
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {subcatProducts.map((product, i) => (
+                          <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.04, duration: 0.3 }}
+                          >
+                            <ProductCard product={product} showCart={categoryType === "with-cart"} />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+                {/* Productos sin subcategoría asignada */}
+                {(() => {
+                  const unmatched = displayProducts.filter(
+                    (p) => !category.subcategories.some((sub) => matchesSubcat(p, sub))
+                  );
+                  if (unmatched.length === 0) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <h2
+                        className="font-serif font-light text-3xl md:text-4xl mb-6 pb-3 border-b border-sage-200"
+                        style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
+                      >
+                        Otros
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {unmatched.map((product, i) => (
+                          <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.04, duration: 0.3 }}
+                          >
+                            <ProductCard product={product} showCart={categoryType === "with-cart"} />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+              </div>
             ) : (
+              // Sin subcategorías: grid plano
               <motion.div
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                 initial={{ opacity: 0, y: 12 }}
