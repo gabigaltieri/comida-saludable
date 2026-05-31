@@ -22,7 +22,7 @@ import Footer from "@/components/Footer";
 import { Product } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
-const DISCOUNT: Record<number, number> = { 10: 0.05, 20: 0.1 };
+const FIXED_PRICE: Record<number, number> = { 10: 85000, 20: 164000 };
 
 function ComboViandasContent() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -33,7 +33,7 @@ function ComboViandasContent() {
   const editId = searchParams.get("edit");
   const rawSize = parseInt(searchParams.get("size") ?? "10", 10);
   const targetSize = rawSize === 20 ? 20 : 10;
-  const discountRate = DISCOUNT[targetSize];
+  const comboPrice = FIXED_PRICE[targetSize];
   const { addCombo, replaceCombo, openCart } = useCart();
 
   // Solo productos de viandas congeladas
@@ -69,13 +69,6 @@ function ComboViandasContent() {
     [selectedItems]
   );
 
-  const subtotal = useMemo(
-    () => selectedItems.reduce((s, i) => s + i.product.price * i.qty, 0),
-    [selectedItems]
-  );
-
-  const discount = Math.round(subtotal * discountRate);
-  const total = subtotal - discount;
   const isComplete = totalUnits === targetSize;
   const isOver = totalUnits > targetSize;
 
@@ -116,7 +109,7 @@ function ComboViandasContent() {
       id: comboId,
       name: `Combo ×${targetSize} Viandas Congeladas`,
       description: productList,
-      price: total,
+      price: comboPrice,
       image: selectedItems[0]?.product.image ?? "",
       imageAlt: `Combo de ${targetSize} viandas congeladas`,
       product_ids,
@@ -185,11 +178,10 @@ function ComboViandasContent() {
               >
                 Elegí exactamente{" "}
                 <span className="text-white/80 font-medium">{targetSize} viandas congeladas</span>{" "}
-                y llevate un{" "}
+                al precio fijo de{" "}
                 <span style={{ color: "#a3bda3" }} className="font-semibold">
-                  {discountRate * 100}% de descuento
-                </span>{" "}
-                en tu pedido.
+                  {formatPrice(comboPrice)}
+                </span>.
               </motion.p>
             </div>
           </div>
@@ -481,50 +473,23 @@ function ComboViandasContent() {
               {/* Totales + CTA */}
               {selectedItems.length > 0 && (
                 <div className="px-5 pb-5 pt-3 border-t border-sage-50 flex flex-col gap-3">
-                  {/* Descuento */}
+                  {/* Precio fijo */}
                   <div
-                    className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
                     style={{ background: "#f4f7f4", border: "1px solid #c9d9c9" }}
                   >
-                    <Snowflake className="w-4 h-4 flex-shrink-0 mt-0.5 text-sage-400" />
-                    <div>
-                      <p className="font-sans text-xs font-semibold text-sage-700">
-                        {discountRate * 100}% off al completar el combo
-                      </p>
-                      {isComplete && (
-                        <p className="font-sans text-[11px] text-sage-500">
-                          Ahorrás {formatPrice(discount)}
-                        </p>
-                      )}
-                    </div>
+                    <Snowflake className="w-4 h-4 flex-shrink-0 text-sage-400" />
+                    <p className="font-sans text-xs font-semibold text-sage-700">
+                      Precio fijo del combo ×{targetSize}
+                    </p>
                   </div>
 
-                  {/* Precios */}
-                  <div className="flex flex-col gap-1">
-                    {isComplete && discount > 0 && (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="font-sans text-xs text-sage-400">Subtotal</span>
-                          <span className="font-sans text-xs text-sage-400 line-through">
-                            {formatPrice(subtotal)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="font-sans text-xs font-medium text-sage-600">
-                            Descuento {discountRate * 100}%
-                          </span>
-                          <span className="font-sans text-xs font-medium text-sage-600">
-                            −{formatPrice(discount)}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    <div className="flex justify-between items-center mt-0.5">
-                      <span className="font-sans text-sm font-semibold text-sage-700">Total</span>
-                      <span className="font-sans text-lg font-bold text-sage-800">
-                        {isComplete ? formatPrice(total) : formatPrice(subtotal)}
-                      </span>
-                    </div>
+                  {/* Total */}
+                  <div className="flex justify-between items-center">
+                    <span className="font-sans text-sm font-semibold text-sage-700">Total</span>
+                    <span className="font-sans text-lg font-bold text-sage-800">
+                      {formatPrice(comboPrice)}
+                    </span>
                   </div>
 
                   <button

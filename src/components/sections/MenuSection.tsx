@@ -7,14 +7,32 @@ import { Product } from "@/lib/data";
 import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 
+type SubcategoryItem = { id: string; name: string };
+
 export default function MenuSection({ initialCategory }: { initialCategory?: string }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSub, setSelectedSub] = useState<string>("all");
+  const [filterSubs, setFilterSubs] = useState<SubcategoryItem[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    getProducts().then(setProducts).finally(() => setLoading(false));
+    // Cargar productos
+    getProducts().then((prods) => {
+      setProducts(prods);
+      setLoading(false);
+    });
+
+    // Cargar subcategorías para construir los botones de filtro
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((cats: { subcategories?: SubcategoryItem[] }[]) => {
+        if (!Array.isArray(cats)) return;
+        const subs = cats.flatMap((c) => c.subcategories ?? []);
+        setFilterSubs(subs);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -23,21 +41,27 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
     }
   }, [initialCategory]);
 
+  // Solo mostrar subcategorías que tienen al menos un producto
+  const usedSubIds = new Set(products.map((p) => p.subcategory_id).filter(Boolean) as string[]);
+  const visibleSubs = filterSubs.filter((s) => usedSubIds.has(s.id));
+
   const filtered = products.filter((p) => {
     const matchesCat = !initialCategory || p.category === initialCategory;
+    const matchesSub = selectedSub === "all" || p.subcategory_id === selectedSub;
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCat && matchesSearch;
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.tags.some((t) => t.toLowerCase().includes(q));
+    return matchesCat && matchesSub && matchesSearch;
   });
 
   return (
     <section id="menu" ref={sectionRef} className="py-20 md:py-28 bg-cream-100">
       <div className="max-w-6xl mx-auto px-5 md:px-8">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8">
           <motion.p
             className="section-label mb-2"
             initial={{ opacity: 0 }}
@@ -72,6 +96,40 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
               />
             </div>
           </motion.div>
+
+          {/* Filter buttons por subcategoría */}
+          {!loading && visibleSubs.length > 0 && (
+            <motion.div
+              className="flex flex-wrap gap-2 mt-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <button
+                onClick={() => setSelectedSub("all")}
+                className={`px-4 py-1.5 rounded-full font-sans text-sm transition-all duration-200 border ${
+                  selectedSub === "all"
+                    ? "bg-sage-600 text-white border-sage-600"
+                    : "bg-white text-sage-600 border-sage-200 hover:border-sage-400 hover:bg-sage-50"
+                }`}
+              >
+                Todos
+              </button>
+              {visibleSubs.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => setSelectedSub(sub.id)}
+                  className={`px-4 py-1.5 rounded-full font-sans text-sm transition-all duration-200 border ${
+                    selectedSub === sub.id
+                      ? "bg-sage-600 text-white border-sage-600"
+                      : "bg-white text-sage-600 border-sage-200 hover:border-sage-400 hover:bg-sage-50"
+                  }`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </motion.div>
+          )}
         </div>
 
         {/* Products Grid */}
@@ -81,37 +139,42 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
           </div>
         )}
         <AnimatePresence mode="wait">
-          {!loading && <motion.div
-            key={searchQuery}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.4 }}
-          >
-            {filtered.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="font-serif text-3xl text-sage-300 mb-2" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}>
-                  Sin resultados
-                </p>
-                <p className="font-sans text-sm text-sage-400">
-                  Probá con otra búsqueda o cambiá la categoría
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {filtered.map((product, i) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.5 }}
+          {!loading && (
+            <motion.div
+              key={searchQuery + selectedSub}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
+              {filtered.length === 0 ? (
+                <div className="text-center py-20">
+                  <p
+                    className="font-serif text-3xl text-sage-300 mb-2"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                   >
-                    <ProductCard product={product} showCart={product.category.includes("congelad")} />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </motion.div>}
+                    Sin resultados
+                  </p>
+                  <p className="font-sans text-sm text-sage-400">
+                    Probá con otra búsqueda o cambiá el filtro
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filtered.map((product, i) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.5 }}
+                    >
+                      <ProductCard product={product} showCart={product.category.includes("congelad")} />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Bottom note */}

@@ -276,6 +276,8 @@ export default function AdminProductos() {
   const [saving, setSaving] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterSubcat, setFilterSubcat] = useState("");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; product?: Product } | null>(null);
   const [draft, setDraft] = useState<ProductDraft>(EMPTY_DRAFT);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -418,12 +420,19 @@ export default function AdminProductos() {
     }
   };
 
-  const filtered = search
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.category.includes(search.toLowerCase())
-      )
-    : products;
+  const filtered = products.filter((p) => {
+    const q = search.toLowerCase();
+    const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.category.includes(q);
+    const matchesCat = !filterCategory || p.category === filterCategory;
+    const matchesSubcat = !filterSubcat || p.subcategory_id === filterSubcat;
+    return matchesSearch && matchesCat && matchesSubcat;
+  });
+  const hasFilter = !!(search || filterCategory || filterSubcat);
+
+  // Subcategorías de la categoría seleccionada
+  const activeCatSubs = filterCategory
+    ? (availableCategories.find((c) => c.slug === filterCategory)?.subcategories ?? [])
+    : [];
 
   if (loading) {
     return (
@@ -481,19 +490,98 @@ export default function AdminProductos() {
       </div>
 
       {/* Search */}
-      <div className="relative mb-6 max-w-sm">
+      <div className="relative mb-4 max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o categoría..."
+          placeholder="Buscar por nombre..."
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-sans text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-sage-400 transition-colors" />
       </div>
 
-      {!search && (
-        <p className="font-sans text-xs text-gray-400 mb-3 flex items-center gap-1.5">
-          <GripVertical className="w-3.5 h-3.5" />
-          Arrastrá las filas para cambiar el orden en la tienda
-        </p>
+      {/* Filtros de categoría */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        <button
+          onClick={() => { setFilterCategory(""); setFilterSubcat(""); }}
+          className={cn(
+            "px-3 py-1.5 rounded-full font-sans text-xs font-medium border transition-colors",
+            !filterCategory
+              ? "bg-sage-600 text-white border-sage-600"
+              : "bg-white text-gray-500 border-gray-200 hover:border-sage-300 hover:text-sage-600"
+          )}
+        >
+          Todas ({products.length})
+        </button>
+        {availableCategories.map((cat) => {
+          const count = products.filter((p) => p.category === cat.slug).length;
+          const active = filterCategory === cat.slug;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => {
+                setFilterCategory(active ? "" : cat.slug);
+                setFilterSubcat("");
+              }}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-sans text-xs font-medium border transition-colors",
+                active
+                  ? "bg-sage-600 text-white border-sage-600"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-sage-300 hover:text-sage-600"
+              )}
+            >
+              {cat.name} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filtros de subcategoría — aparecen solo si hay categoría seleccionada */}
+      {activeCatSubs.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4 pl-1 border-l-2 border-sage-200 ml-1">
+          <button
+            onClick={() => setFilterSubcat("")}
+            className={cn(
+              "px-3 py-1 rounded-full font-sans text-xs border transition-colors",
+              !filterSubcat
+                ? "bg-sage-100 text-sage-700 border-sage-300 font-medium"
+                : "bg-white text-gray-400 border-gray-200 hover:border-sage-200 hover:text-sage-500"
+            )}
+          >
+            Todas las subcategorías
+          </button>
+          {activeCatSubs.map((sub) => {
+            const count = products.filter((p) => p.category === filterCategory && p.subcategory_id === sub.id).length;
+            const active = filterSubcat === sub.id;
+            return (
+              <button
+                key={sub.id}
+                onClick={() => setFilterSubcat(active ? "" : sub.id)}
+                className={cn(
+                  "px-3 py-1 rounded-full font-sans text-xs border transition-colors",
+                  active
+                    ? "bg-sage-100 text-sage-700 border-sage-300 font-medium"
+                    : "bg-white text-gray-400 border-gray-200 hover:border-sage-200 hover:text-sage-500"
+                )}
+              >
+                {sub.name} ({count})
+              </button>
+            );
+          })}
+        </div>
       )}
+
+      {/* Resultado + hint arrastre */}
+      <div className="flex items-center gap-4 mb-3">
+        {hasFilter && (
+          <p className="font-sans text-xs text-sage-600 font-medium">
+            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          </p>
+        )}
+        {!hasFilter && (
+          <p className="font-sans text-xs text-gray-400 flex items-center gap-1.5">
+            <GripVertical className="w-3.5 h-3.5" />
+            Arrastrá las filas para cambiar el orden en la tienda
+          </p>
+        )}
+      </div>
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -508,8 +596,8 @@ export default function AdminProductos() {
               </tr>
             </thead>
             <tbody>
-              {search ? (
-                // Sin drag cuando hay búsqueda activa
+              {hasFilter ? (
+                // Sin drag cuando hay filtros activos
                 <>
                   {filtered.map((p) => (
                     <SortableRow

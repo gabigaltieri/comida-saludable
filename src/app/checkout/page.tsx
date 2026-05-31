@@ -53,6 +53,8 @@ function CheckoutContent() {
   const { user, profile, isEmailConfirmed, openAuthModal, saveProfile } = useAuth();
 
   const [delivery, setDelivery] = useState<Delivery>("envio");
+  const SHIPPING_COST = 10000;
+  const grandTotal = total + (delivery === "envio" ? SHIPPING_COST : 0);
   const [payment, setPayment] = useState<Payment>("transferencia");
   const [submitted, setSubmitted] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
@@ -164,7 +166,7 @@ function CheckoutContent() {
             telefono: form.telefono,
             email: form.email,
             productos,
-            total,
+            total: grandTotal,
             entrega: delivery,
             direccion: form.direccion,
             notas: form.notas,
@@ -211,7 +213,7 @@ function CheckoutContent() {
               precio: i.combo.price,
             })),
           ],
-          total,
+          total: grandTotal,
           entrega: delivery,
           direccion: form.direccion,
           pago: paymentLabel,
@@ -234,7 +236,8 @@ function CheckoutContent() {
       ...items.map((i) => `• ${i.quantity}x ${i.product.name} – ${formatPrice(i.product.price * i.quantity)}`),
       ...comboItems.map((i) => `• ${i.quantity}x 🎁 ${i.combo.name} (combo) – ${formatPrice(i.combo.price * i.quantity)}`),
       ``,
-      `*Total: ${formatPrice(total)}*`,
+      delivery === "envio" ? `*Envío a domicilio:* ${formatPrice(SHIPPING_COST)}` : "",
+      `*Total: ${formatPrice(grandTotal)}*`,
       ``,
       `*Entrega:* ${deliveryLabel}`,
       delivery === "envio" ? `*Dirección:* ${form.direccion}` : "",
@@ -689,8 +692,8 @@ function CheckoutContent() {
               </div>
               <div className="flex justify-between items-center mb-4">
                 <span className="font-sans text-sm text-sage-500">Envío</span>
-                <span className="font-sans text-xs text-sage-400 italic">
-                  {delivery === "retiro" ? "Gratis (retiro)" : "A coordinar"}
+                <span className="font-sans text-sm text-sage-700">
+                  {delivery === "retiro" ? "Gratis (retiro en local)" : formatPrice(SHIPPING_COST)}
                 </span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-sage-200">
@@ -699,7 +702,7 @@ function CheckoutContent() {
                   className="font-serif text-3xl font-semibold text-sage-800"
                   style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
                 >
-                  {formatPrice(total)}
+                  {formatPrice(grandTotal)}
                 </span>
               </div>
             </div>

@@ -11,11 +11,17 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1547592180-85f17399055
 
 export default function Hero() {
   const [bgImage, setBgImage] = useState(FALLBACK_IMAGE);
+  const [heading, setHeading] = useState<string | null>(null);
+  const [subheading, setSubheading] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/banner?id=home-hero")
       .then((r) => r.json())
-      .then((d) => { if (d.active && d.image_url) setBgImage(d.image_url); });
+      .then((d) => {
+        if (d.active && d.image_url) setBgImage(d.image_url);
+        if (d.heading_text) setHeading(d.heading_text);
+        if (d.subheading_text) setSubheading(d.subheading_text);
+      });
   }, []);
 
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -23,7 +29,7 @@ export default function Hero() {
   )}`;
 
   return (
-    <section className="relative h-screen flex flex-col overflow-hidden">
+    <section className="relative h-[55vh] min-h-[400px] flex flex-col overflow-hidden">
 
       {/* Background image */}
       <div className="absolute inset-0">
@@ -48,27 +54,31 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="font-sans text-white/50 text-[11px] uppercase tracking-[0.35em] block mb-7"
+          className="font-sans text-white/50 text-[11px] uppercase tracking-[0.35em] block mb-4"
         >
-          Palermo &amp; Villa Crespo · Buenos Aires
+          {subheading ?? "Palermo & Villa Crespo · Buenos Aires"}
         </motion.span>
 
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif text-white font-light leading-[1.08] mb-10 max-w-4xl"
+          className="font-serif text-white font-light leading-[1.08] mb-6 max-w-3xl"
           style={{
             fontFamily: "var(--font-cormorant, Georgia, serif)",
-            fontSize: "clamp(3.2rem, 7.5vw, 6.5rem)",
+            fontSize: "clamp(2.2rem, 5vw, 4rem)",
           }}
         >
-          Viandas saludables,
-          <br />
-          para todas tus{" "}
-          <em className="italic font-normal" style={{ color: "#D4B882" }}>
-            metas.
-          </em>
+          {heading ?? (
+            <>
+              Viandas saludables,
+              <br />
+              para todas tus{" "}
+              <em className="italic font-normal" style={{ color: "#D4B882" }}>
+                metas.
+              </em>
+            </>
+          )}
         </motion.h1>
 
         <motion.div
@@ -100,7 +110,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6 }}
-        className="relative z-10 flex flex-col items-center gap-1.5 pb-10 text-white/30"
+        className="relative z-10 flex flex-col items-center gap-1.5 pb-5 text-white/30"
       >
         <span className="font-sans text-[9px] uppercase tracking-[0.3em]">Explorá</span>
         <motion.div

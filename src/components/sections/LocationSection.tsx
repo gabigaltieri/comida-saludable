@@ -56,7 +56,7 @@ export default function LocationSection() {
                 <div className="flex-1">
                   <p className="font-sans text-xs text-sage-400 uppercase tracking-wider mb-0.5">Dirección</p>
                   <p className="font-sans text-sage-800 font-medium">{ADDRESS}</p>
-                  <p className="font-sans text-sm text-sage-500 mt-0.5">Palermo / Villa Crespo, CABA</p>
+                  <p className="font-sans text-sm text-sage-500 mt-0.5">Villa Crespo, CABA</p>
                 </div>
                 <ExternalLink className="w-4 h-4 text-sage-300 group-hover:text-sage-500 transition-colors mt-1" />
               </a>
@@ -70,8 +70,8 @@ export default function LocationSection() {
                   <p className="font-sans text-xs text-sage-400 uppercase tracking-wider mb-1.5">Horarios</p>
                   <div className="flex flex-col gap-1">
                     <p className="font-sans text-sage-700 text-sm">{OPENING_HOURS.weekdays}</p>
-                    <p className="font-sans text-sage-700 text-sm">{OPENING_HOURS.saturday}</p>
-                    <p className="font-sans text-sage-400 text-sm">{OPENING_HOURS.sunday}</p>
+                    {OPENING_HOURS.saturday && <p className="font-sans text-sage-700 text-sm">{OPENING_HOURS.saturday}</p>}
+                    {OPENING_HOURS.sunday && <p className="font-sans text-sage-400 text-sm">{OPENING_HOURS.sunday}</p>}
                   </div>
                 </div>
               </div>

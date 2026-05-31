@@ -96,6 +96,7 @@ function ProductDetail({ productId }: { productId: string }) {
   };
 
   const activePrice = product.on_sale && product.sale_price ? product.sale_price : product.price;
+  const isDiarias = product.category === "viandas-diarias";
 
   const handleWhatsApp = () => {
     const msg = encodeURIComponent(
@@ -263,85 +264,84 @@ function ProductDetail({ productId }: { productId: string }) {
 
             <div className="h-px bg-sage-100 mb-6" />
 
-            {/* Quantity + subtotal */}
-            <div className="flex items-center gap-5 mb-5">
-              <div className="flex items-center gap-3 bg-white border border-sage-200 rounded-full px-4 py-2.5 shadow-sm">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-6 h-6 rounded-full bg-sage-100 hover:bg-sage-200 flex items-center justify-center transition-colors text-sage-600"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <span className="font-sans font-semibold text-sage-800 w-5 text-center tabular-nums">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="w-6 h-6 rounded-full bg-sage-100 hover:bg-sage-200 flex items-center justify-center transition-colors text-sage-600"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-
-              {quantity > 1 && (
-                <motion.p
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="font-sans text-sm text-sage-400"
-                >
-                  Subtotal:{" "}
-                  <span
-                    className="font-serif text-xl text-sage-700 font-semibold"
-                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+            {/* Quantity + subtotal — solo para productos que se pueden comprar */}
+            {!isDiarias && (
+              <div className="flex items-center gap-5 mb-5">
+                <div className="flex items-center gap-3 bg-white border border-sage-200 rounded-full px-4 py-2.5 shadow-sm">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="w-6 h-6 rounded-full bg-sage-100 hover:bg-sage-200 flex items-center justify-center transition-colors text-sage-600"
                   >
-                    {formatPrice(activePrice * quantity)}
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="font-sans font-semibold text-sage-800 w-5 text-center tabular-nums">
+                    {quantity}
                   </span>
-                </motion.p>
-              )}
-            </div>
+                  <button
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="w-6 h-6 rounded-full bg-sage-100 hover:bg-sage-200 flex items-center justify-center transition-colors text-sage-600"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
 
-            {/* Add to cart */}
-            <motion.button
-              onClick={handleAdd}
-              disabled={!product.available}
-              whileTap={{ scale: 0.97 }}
-              className={cn(
-                "w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 font-sans font-semibold text-base transition-all duration-300 mb-3",
-                added
-                  ? "bg-sage-600 text-white"
-                  : "bg-sage-500 hover:bg-sage-600 text-white shadow-[0_4px_20px_rgba(84,125,84,0.28)] hover:shadow-[0_8px_32px_rgba(84,125,84,0.38)] hover:-translate-y-0.5",
-                !product.available && "opacity-40 cursor-not-allowed"
-              )}
-            >
-              <AnimatePresence mode="wait">
-                {added ? (
-                  <motion.span
-                    key="check"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex items-center gap-2"
+                {quantity > 1 && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="font-sans text-sm text-sage-400"
                   >
-                    <Check className="w-5 h-5" />
-                    {quantity > 1 ? `${quantity} unidades en tu carrito` : "¡Agregado al carrito!"}
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="add"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="flex items-center gap-2"
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    Agregar al carrito
-                  </motion.span>
+                    Subtotal:{" "}
+                    <span
+                      className="font-serif text-xl text-sage-700 font-semibold"
+                      style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+                    >
+                      {formatPrice(activePrice * quantity)}
+                    </span>
+                  </motion.p>
                 )}
-              </AnimatePresence>
-            </motion.button>
+              </div>
+            )}
 
-            {/* WhatsApp */}
+            {/* Add to cart — solo viandas congeladas */}
+            {!isDiarias && (
+              <motion.button
+                onClick={handleAdd}
+                disabled={!product.available}
+                whileTap={{ scale: 0.97 }}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 font-sans font-semibold text-base transition-all duration-300 mb-3",
+                  added
+                    ? "bg-sage-600 text-white"
+                    : "bg-sage-500 hover:bg-sage-600 text-white shadow-[0_4px_20px_rgba(84,125,84,0.28)] hover:shadow-[0_8px_32px_rgba(84,125,84,0.38)] hover:-translate-y-0.5",
+                  !product.available && "opacity-40 cursor-not-allowed"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {added ? (
+                    <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                      <Check className="w-5 h-5" />
+                      {quantity > 1 ? `${quantity} unidades en tu carrito` : "¡Agregado al carrito!"}
+                    </motion.span>
+                  ) : (
+                    <motion.span key="add" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5" />
+                      Agregar al carrito
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            )}
+
+            {/* WhatsApp — siempre visible, primario en viandas diarias */}
             <button
               onClick={handleWhatsApp}
-              className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-3.5 font-sans font-medium text-sm border border-sage-200 bg-white text-sage-600 hover:border-[#25D366] hover:text-[#25D366] hover:bg-green-50 transition-all duration-300 shadow-sm"
+              className={cn(
+                "w-full flex items-center justify-center gap-2.5 rounded-2xl py-4 font-sans font-medium text-sm transition-all duration-300 shadow-sm",
+                isDiarias
+                  ? "bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold shadow-[0_4px_20px_rgba(37,211,102,0.3)] hover:-translate-y-0.5"
+                  : "border border-sage-200 bg-white text-sage-600 hover:border-[#25D366] hover:text-[#25D366] hover:bg-green-50"
+              )}
             >
               <MessageCircle className="w-4 h-4" />
               Consultar disponibilidad por WhatsApp
@@ -397,7 +397,7 @@ function ProductDetail({ productId }: { productId: string }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07, duration: 0.35 }}
                 >
-                  <ProductCard product={p} />
+                  <ProductCard product={p} showCart={p.category !== "viandas-diarias"} showWhatsApp={p.category === "viandas-diarias"} />
                 </motion.div>
               ))}
             </div>

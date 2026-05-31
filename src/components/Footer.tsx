@@ -15,7 +15,7 @@ export default function Footer() {
               className="font-serif text-3xl md:text-4xl text-white font-semibold mb-1"
               style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
             >
-              ¿Lista para comer rico?
+              ¿Listo para comer rico?
             </h3>
             <p className="font-sans text-white/60 text-sm">
               Pedí por WhatsApp y coordinamos entrega o retiro.

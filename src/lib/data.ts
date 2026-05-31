@@ -36,7 +36,7 @@ export const INSTAGRAM_HANDLE = "@262.cosasricas";
 export const ADDRESS = "Tte. Gral. Eustoquio Frías 262, CABA";
 export const MAPS_LINK = "https://maps.google.com/?q=Tte.+Gral.+Eustoquio+Frías+262+Buenos+Aires";
 export const OPENING_HOURS = {
-  weekdays: "Lun – Vie: 9:00 a 20:00",
-  saturday: "Sábado: 10:00 a 16:00",
-  sunday: "Domingo: cerrado",
+  weekdays: "Lunes a viernes: 9:00 a 15:00",
+  saturday: "",
+  sunday: "",
 };

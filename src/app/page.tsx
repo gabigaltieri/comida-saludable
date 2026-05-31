@@ -7,8 +7,8 @@ import Hero from "@/components/sections/Hero";
 import Categories from "@/components/sections/Categories";
 import MenuSection from "@/components/sections/MenuSection";
 import AboutSection from "@/components/sections/AboutSection";
-import EmpresasSection from "@/components/sections/EmpresasSection";
-import CateringSection from "@/components/sections/CateringSection";
+import NosotrosSection from "@/components/sections/NosotrosSection";
+import FaqSection from "@/components/sections/FaqSection";
 import HowToOrder from "@/components/sections/HowToOrder";
 import Reviews from "@/components/sections/Reviews";
 import LocationSection from "@/components/sections/LocationSection";
@@ -29,11 +29,11 @@ export default function HomePage() {
           <Categories />
           <MenuSection />
           <HowToOrder />
-          <EmpresasSection />
-          <CateringSection />
           <LocationSection />
-          <Reviews />
           <AboutSection />
+          <Reviews />
+          <NosotrosSection />
+          <FaqSection />
         </main>
 
         <Footer />

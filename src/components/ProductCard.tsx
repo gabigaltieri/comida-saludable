@@ -3,13 +3,21 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, Check, ShoppingBag } from "lucide-react";
+import { Plus, Check, ShoppingBag, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Product } from "@/lib/data";
+import { Product, WHATSAPP_NUMBER } from "@/lib/data";
 import { useCart, formatPrice } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
-export default function ProductCard({ product, showCart = true }: { product: Product; showCart?: boolean }) {
+export default function ProductCard({
+  product,
+  showCart = true,
+  showWhatsApp = false,
+}: {
+  product: Product;
+  showCart?: boolean;
+  showWhatsApp?: boolean;
+}) {
   const { addItem, items, openCart } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -135,6 +143,20 @@ export default function ProductCard({ product, showCart = true }: { product: Pro
               </motion.span>
               {justAdded ? "¡Listo!" : "Agregar"}
             </motion.button>
+          )}
+
+          {showWhatsApp && (
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                `¡Hola! Me gustaría consultar la disponibilidad de ${product.name} 🌿`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 font-sans text-xs text-sage-400 hover:text-[#25D366] transition-colors duration-200"
+            >
+              <MessageCircle className="w-3 h-3 flex-shrink-0" />
+              Consultar por WhatsApp
+            </a>
           )}
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Leaf, Heart, Zap, Shield } from "lucide-react";
+import { Leaf, Heart, Zap } from "lucide-react";
 
 const VALUES = [
   {
@@ -22,12 +22,6 @@ const VALUES = [
     title: "Listo en minutos",
     description: "Para que tengas más tiempo de hacer lo que te gusta. Comer rico sin cocinar.",
     color: "bg-amber-100 text-amber-600",
-  },
-  {
-    icon: Shield,
-    title: "Packaging responsable",
-    description: "Usamos recipientes biodegradables y reutilizables. Cuidamos el planeta también.",
-    color: "bg-sky-100 text-sky-600",
   },
 ];
 
