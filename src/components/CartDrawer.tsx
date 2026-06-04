@@ -297,6 +297,15 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                   <MessageCircle className="w-4 h-4" />
                   O enviar directo por WhatsApp
                 </button>
+
+                {/* Seguir comprando */}
+                <Link
+                  href="/tienda"
+                  onClick={onClose}
+                  className="w-full flex items-center justify-center gap-1.5 text-sm font-sans text-sage-500 hover:text-sage-700 transition-colors py-2 border-t border-sage-100 mt-1 pt-3"
+                >
+                  ← Seguir comprando
+                </Link>
               </div>
             )}
           </motion.div>

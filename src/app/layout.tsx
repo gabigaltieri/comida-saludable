@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 export const viewport: Viewport = {
   themeColor: "#547d54",
@@ -51,6 +52,7 @@ export default function RootLayout({
       }}>
         <Providers>{children}</Providers>
         <WhatsAppButton />
+        <ScrollToTopButton />
       </body>
     </html>
   );

@@ -411,6 +411,8 @@ export default function ViandaSlugPage({
   const isProductPage =
     categoryType === "with-cart" || categoryType === "display-only";
 
+  useEffect(() => { window.scrollTo({ top: 0 }); }, []);
+
   useEffect(() => {
     async function load() {
       try {
@@ -578,7 +580,7 @@ export default function ViandaSlugPage({
                 <div className="flex flex-wrap gap-3 flex-shrink-0">
                   {/* WhatsApp */}
                   <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("¡Hola! Me gustaría saber más sobre sus viandas")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-sans font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm"
@@ -600,7 +602,7 @@ export default function ViandaSlugPage({
                     </span>
                   </button>
                   <a
-                    href="https://www.rappi.com.ar"
+                    href="https://www.rappi.com.ar/restaurantes/200971-262-cosas-ricas"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-sans font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm"

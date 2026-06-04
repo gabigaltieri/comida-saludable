@@ -1,9 +1,10 @@
-import { Leaf, Instagram, MessageCircle, Heart } from "lucide-react";
+import { Instagram, MessageCircle, Heart } from "lucide-react";
+import Image from "next/image";
 import { WHATSAPP_NUMBER, INSTAGRAM_HANDLE, ADDRESS } from "@/lib/data";
 
 export default function Footer() {
   const year = new Date().getFullYear();
-  const waLink = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("¡Hola! Me gustaría saber más sobre sus viandas")}`;
 
   return (
     <footer className="bg-sage-800 text-white">
@@ -41,20 +42,13 @@ export default function Footer() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center">
-                  <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
-                </div>
-                <div>
-                  <span
-                    className="font-serif text-white font-semibold text-lg leading-none block"
-                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
-                  >
-                    262
-                  </span>
-                  <span className="font-sans text-white/40 text-[9px] uppercase tracking-[0.18em] leading-none block">
-                    Cosas Ricas
-                  </span>
-                </div>
+                <Image
+                  src="/logo.png"
+                  alt="262 Viandas Saludables"
+                  width={44}
+                  height={44}
+                  className="rounded-full object-cover"
+                />
               </div>
               <p className="font-sans text-white/50 text-sm leading-relaxed max-w-xs">
                 Comida casera, fresca y nutritiva para simplificarte la vida.
@@ -119,8 +113,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="font-sans text-white/30 text-[10px] mb-0.5">Horarios</p>
-                  <p className="font-sans text-white/60 text-sm">Lun–Vie: 9:00–20:00</p>
-                  <p className="font-sans text-white/60 text-sm">Sáb: 10:00–16:00</p>
+                  <p className="font-sans text-white/60 text-sm">Lunes a viernes: 9:00 a 15:00</p>
                 </div>
                 <div>
                   <p className="font-sans text-white/30 text-[10px] mb-0.5">Instagram</p>

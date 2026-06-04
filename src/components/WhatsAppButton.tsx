@@ -10,7 +10,7 @@ export default function WhatsAppButton() {
 
   return (
     <motion.a
-      href={`https://wa.me/${WHATSAPP_NUMBER}`}
+      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("¡Hola! Me gustaría saber más sobre sus viandas")}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contactanos por WhatsApp"

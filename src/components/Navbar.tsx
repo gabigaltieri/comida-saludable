@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShoppingBag, Menu, X, Instagram, Leaf, Store, UserCircle2, LogOut } from "lucide-react";
+import { ShoppingBag, Menu, X, Instagram, Store, UserCircle2, LogOut, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +13,13 @@ const navLinks = [
   { label: "Nuestras opciones", href: "#nuestras-opciones" },
   { label: "Nosotros", href: "#about" },
   { label: "Contacto", href: "#location" },
+];
+
+const viandaLinks = [
+  { label: "Viandas Congeladas",    href: "#viandas-congeladas" },
+  { label: "Viandas Diarias",       href: "#viandas-diarias" },
+  { label: "Viandas para Empresas", href: "#viandas-empresas" },
+  { label: "Catering para Eventos", href: "#catering-eventos" },
 ];
 
 export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
@@ -49,21 +57,15 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center group-hover:bg-sage-600 transition-colors">
-              <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span
-                className={`font-serif font-semibold text-lg md:text-xl leading-none transition-colors duration-500 ${scrolled ? "text-sage-800" : "text-white"}`}
-                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
-              >
-                262
-              </span>
-              <span className={`font-sans text-[9px] uppercase tracking-[0.18em] leading-none mt-0.5 transition-colors duration-500 ${scrolled ? "text-sage-500" : "text-white/70"}`}>
-                Cosas Ricas
-              </span>
-            </div>
+          <a href="#" className="flex items-center group">
+            <Image
+              src="/logo.png"
+              alt="262 Viandas Saludables"
+              width={52}
+              height={52}
+              className="rounded-full object-cover transition-opacity duration-300 group-hover:opacity-85"
+              priority
+            />
           </a>
 
           {/* Desktop Nav */}
@@ -89,6 +91,27 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
                 )}
               </li>
             ))}
+
+            {/* Viandas dropdown — hover */}
+            <li className="relative group/viandas">
+              <button className={`flex items-center gap-1 font-sans text-sm transition-colors duration-300 ${scrolled ? "text-sage-700 hover:text-sage-500" : "text-white hover:text-white/70"}`}>
+                Viandas
+                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/viandas:rotate-180" />
+              </button>
+              <div className="absolute left-0 top-full pt-3 hidden group-hover/viandas:block">
+                <div className="w-52 bg-white rounded-2xl shadow-lg border border-sage-100 overflow-hidden py-1">
+                  {viandaLinks.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="block px-4 py-2.5 font-sans text-sm text-sage-700 hover:bg-sage-50 hover:text-sage-900 transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </li>
           </ul>
 
           {/* Right actions */}
@@ -273,8 +296,7 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
                 {INSTAGRAM_HANDLE}
               </a>
               <div className="flex items-center gap-1.5">
-                <Leaf className="w-3.5 h-3.5 text-sage-400" />
-                <span className="font-sans text-[10px] text-sage-400 tracking-wide">Comida saludable</span>
+                <span className="font-sans text-[10px] text-sage-400 tracking-wide">Rico, sano y práctico</span>
               </div>
             </div>
           </motion.div>

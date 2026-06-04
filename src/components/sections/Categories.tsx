@@ -156,9 +156,10 @@ export default function Categories() {
 
         {/* ── VIANDAS CONGELADAS ── */}
         <motion.div
+          id="viandas-congeladas"
           initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center"
+          className="text-center scroll-mt-32"
         >
           <div className="flex items-center justify-center gap-3 mb-2">
             <span className="text-2xl">❄️</span>
@@ -203,8 +204,10 @@ export default function Categories() {
 
         {/* ── VIANDAS DIARIAS ── */}
         <motion.div
+          id="viandas-diarias"
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="scroll-mt-32"
         >
           {/* Encabezado centrado */}
           <div className="text-center mb-8">
@@ -277,8 +280,10 @@ export default function Categories() {
 
         {/* ── VIANDAS PARA EMPRESAS ── */}
         <motion.div
+          id="viandas-empresas"
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="scroll-mt-32"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* copy */}
@@ -349,8 +354,10 @@ export default function Categories() {
 
         {/* ── CATERING PARA EVENTOS ── */}
         <motion.div
+          id="catering-eventos"
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="scroll-mt-32"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* copy */}

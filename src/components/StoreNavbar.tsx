@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Leaf, ArrowLeft, UserCircle2, LogOut, ChevronDown } from "lucide-react";
+import { ShoppingBag, ArrowLeft, UserCircle2, LogOut, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,19 +23,14 @@ export default function StoreNavbar() {
     <>
       <header className="bg-cream-100/95 backdrop-blur-md border-b border-sage-100 shadow-sm">
         <nav className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center group-hover:bg-sage-600 transition-colors">
-              <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="font-serif text-sage-800 font-semibold text-lg leading-none"
-                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}>
-                262
-              </span>
-              <span className="font-sans text-sage-500 text-[9px] uppercase tracking-[0.18em] leading-none mt-0.5">
-                Cosas Ricas
-              </span>
-            </div>
+          <Link href="/" className="flex items-center group">
+            <Image
+              src="/logo.png"
+              alt="262 Viandas Saludables"
+              width={44}
+              height={44}
+              className="rounded-full object-cover transition-opacity duration-300 group-hover:opacity-85 shadow-[0_1px_6px_rgba(0,0,0,0.15)]"
+            />
           </Link>
 
           <div className="flex items-center gap-2">

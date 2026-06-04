@@ -6,7 +6,8 @@ import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import Image from "next/image";
-import { Loader2, MessageCircle, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { Loader2, MessageCircle, ShoppingBag, Snowflake, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/cart";
 
@@ -105,7 +106,7 @@ function DiariasBanner() {
         </p>
         <div className="flex items-center gap-2 flex-wrap justify-center flex-shrink-0">
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("¡Hola! Me gustaría saber más sobre sus viandas")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium text-white transition-all hover:scale-105"
@@ -123,7 +124,7 @@ function DiariasBanner() {
             <span className="text-[10px] bg-gray-100 text-gray-400 font-semibold px-1.5 py-0.5 rounded-full">pronto</span>
           </div>
           <a
-            href="https://www.rappi.com.ar"
+            href="https://www.rappi.com.ar/restaurantes/200971-262-cosas-ricas"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 rounded-full font-sans text-sm font-medium border transition-all hover:scale-105"
@@ -193,52 +194,27 @@ function CategorySection({
   category,
   products,
   isFirst,
+  activeSubcatId,
 }: {
   category: CategoryDB;
   products: Product[];
   isFirst: boolean;
+  activeSubcatId: string | null;
 }) {
   const showCart = category.has_cart === true;
   const accentColor = showCart ? "#D4B882" : "#e05d44";
   const labelColor = showCart ? "#547d54" : "#e05d44";
+  const displayName = category.name.replace(/[,\s]+y?\s*[Tt]artas/gi, "").trim();
+
+  const subcatsToShow = activeSubcatId
+    ? category.subcategories.filter((s) => s.id === activeSubcatId)
+    : category.subcategories;
 
   return (
     <div>
-      {/* Divisor entre categorías */}
-      {!isFirst && (
-        <div className="my-16 flex items-center gap-4">
-          <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
-          <span className="font-sans text-xs uppercase tracking-[0.3em] text-sage-400">262 Cosas Ricas</span>
-          <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
-        </div>
-      )}
-
-      {/* Header de categoría */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="mb-8"
-      >
-        <p className="font-sans text-xs uppercase tracking-[0.35em] mb-3" style={{ color: labelColor }}>
-          {showCart ? "Con carrito" : "Solo para ver"}
-        </p>
-        <h2
-          className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
-          style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
-        >
-          {category.name.split(" ")[0]}{" "}
-          <em className="italic font-normal" style={{ color: accentColor }}>
-            {category.name.split(" ").slice(1).join(" ")}
-          </em>
-        </h2>
-        <div className="h-px mb-8" style={{ background: `linear-gradient(to right, ${labelColor}, transparent)` }} />
-      </motion.div>
-
       {/* Subcategorías */}
-      {category.subcategories.length > 0 ? (
-        category.subcategories.map((sub, i) => (
+      {subcatsToShow.length > 0 ? (
+        subcatsToShow.map((sub, i) => (
           <SubcatSection
             key={sub.id}
             subcat={sub}
@@ -248,7 +224,6 @@ function CategorySection({
           />
         ))
       ) : (
-        // Si no hay subcategorías, mostrar todos los productos directo
         products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {products.map((product, i) => (
@@ -277,17 +252,24 @@ export default function TiendaPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [bannerHeading, setBannerHeading] = useState<string | null>(null);
+  const [bannerSubheading, setBannerSubheading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeSubcatId, setActiveSubcatId] = useState<string | null>(null);
+
+  useEffect(() => { window.scrollTo({ top: 0 }); }, []);
 
   useEffect(() => {
     Promise.all([
       getProducts(),
       fetch("/api/categories").then((r) => r.json()),
-      fetch("/api/banner").then((r) => r.json()),
+      fetch("/api/banner?id=tienda-hero").then((r) => r.json()),
     ]).then(([prods, cats, banner]) => {
       setProducts(prods);
       if (Array.isArray(cats)) setCategories(cats);
       if (banner?.active && banner?.image_url) setBannerUrl(banner.image_url);
+      if (banner?.heading_text) setBannerHeading(banner.heading_text);
+      if (banner?.subheading_text) setBannerSubheading(banner.subheading_text);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -324,13 +306,15 @@ export default function TiendaPage() {
             className="font-serif font-light text-5xl md:text-7xl text-white mb-4"
             style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
           >
-            Nuestra{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>tienda</em>
+            {bannerHeading ?? (
+              <>Nuestra{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>tienda</em></>
+            )}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
             className="font-sans text-white/40 text-sm max-w-md mx-auto"
           >
-            Elegí tus viandas, armá tu pedido y lo coordinamos por WhatsApp.
+            {bannerSubheading ?? "Elegí tus viandas, armá tu pedido y lo coordinamos por WhatsApp."}
           </motion.p>
         </div>
       </div>
@@ -343,14 +327,93 @@ export default function TiendaPage() {
             <Loader2 className="w-8 h-8 text-sage-400 animate-spin" />
           </div>
         ) : (
-          categories.map((category, i) => (
-            <CategorySection
-              key={category.id}
-              category={category}
-              products={products.filter((p) => p.category === category.slug)}
-              isFirst={i === 0}
-            />
-          ))
+          <>
+            {/* ── Combos ── */}
+            <div className="mb-14">
+              <p className="font-sans text-xs uppercase tracking-[0.35em] mb-3" style={{ color: "#547d54" }}>Con carrito</p>
+              <h2
+                className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
+                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
+              >
+                Nuestros{" "}
+                <em className="italic font-normal" style={{ color: "#D4B882" }}>combos</em>
+              </h2>
+              <div className="h-px mb-8" style={{ background: "linear-gradient(to right, #547d54, transparent)" }} />
+              <div className="flex gap-4">
+                {[
+                  { size: 10, badge: "Ideal para la semana", price: "$85.000", href: "/tienda/combo-viandas?size=10" },
+                  { size: 20, badge: "Mejor precio",          price: "$164.000", href: "/tienda/combo-viandas?size=20" },
+                ].map((combo) => (
+                  <Link key={combo.size} href={combo.href} className="group block w-44 md:w-52">
+                    <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
+                      <div className="px-5 py-6 relative" style={{ background: "#1a3325" }}>
+                        <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
+                        <span className="inline-block font-sans text-[9px] uppercase tracking-widest text-white/50 bg-white/10 px-2 py-0.5 rounded-full mb-3">
+                          {combo.badge}
+                        </span>
+                        <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "2.4rem" }}>
+                          ×{combo.size}
+                        </p>
+                        <p className="font-sans text-white/50 text-[10px] mt-1">viandas congeladas</p>
+                      </div>
+                      <div className="px-4 py-3 bg-white flex items-center justify-between">
+                        <span className="font-sans text-sm font-semibold text-stone-700">{combo.price}</span>
+                        <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
+                          Armar <ArrowRight className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Divisor ── */}
+            <div className="my-10 flex items-center gap-4">
+              <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
+              <span className="font-sans text-xs uppercase tracking-[0.3em] text-sage-400">Viandas Congeladas</span>
+              <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
+            </div>
+
+            {/* ── Filtros de subcategoría ── */}
+            {(() => {
+              const congeladas = categories.find((c) => c.slug === "viandas-congeladas");
+              if (!congeladas || congeladas.subcategories.length === 0) return null;
+              return (
+                <div className="flex items-center gap-2 flex-wrap mb-8">
+                  <button
+                    onClick={() => setActiveSubcatId(null)}
+                    className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeSubcatId === null ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                  >
+                    Todas
+                  </button>
+                  {congeladas.subcategories.map((sub) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => setActiveSubcatId(sub.id)}
+                      className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeSubcatId === sub.id ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* ── Productos ── */}
+            {categories
+              .filter((c) => c.slug === "viandas-congeladas")
+              .map((category) => (
+                <CategorySection
+                  key={category.id}
+                  category={category}
+                  products={products.filter((p) => p.category === category.slug)}
+                  isFirst={true}
+                  activeSubcatId={activeSubcatId}
+                />
+              ))
+            }
+          </>
         )}
       </main>
 

@@ -25,7 +25,7 @@ export default function Hero() {
   }, []);
 
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    "¡Hola! Me gustaría saber más sobre sus viandas 🌿"
+    "¡Hola! Me gustaría saber más sobre sus viandas"
   )}`;
 
   return (

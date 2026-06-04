@@ -6,7 +6,7 @@ import { ADDRESS, MAPS_LINK, OPENING_HOURS, WHATSAPP_NUMBER, INSTAGRAM_HANDLE } 
 
 export default function LocationSection() {
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    "¡Hola! Tengo una consulta sobre sus productos 🌿"
+    "Hola estoy interesado en sus productos"
   )}`;
 
   return (
