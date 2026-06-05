@@ -38,11 +38,6 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (initialCategory) {
-      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [initialCategory]);
 
   const categoryProducts = initialCategory
     ? products.filter((p) => p.category === initialCategory)
