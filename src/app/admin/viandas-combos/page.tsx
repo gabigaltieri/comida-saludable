@@ -19,7 +19,7 @@ function ComboEditor({
   onDelete,
 }: {
   combo: ViandasCombo;
-  onSave: (id: string, price: number, size: number, badge: string, category: string) => Promise<void>;
+  onSave: (id: string, price: number, size: number, badge: string, category: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<void>;
 }) {
   const [price, setPrice] = useState(String(combo.price));
@@ -28,21 +28,22 @@ function ComboEditor({
   const [category, setCategory] = useState(combo.category || "viandas");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const dirty =
-    String(price) !== String(combo.price) ||
-    String(size) !== String(combo.size) ||
-    badge !== combo.badge ||
-    category !== (combo.category || "viandas");
-
   async function handleSave() {
+    if (!size || !price) { setSaveError("Completá unidades y precio"); return; }
     setSaving(true);
-    await onSave(combo.id, Number(price), Number(size), badge, category);
+    setSaveError("");
+    const ok = await onSave(combo.id, Number(price), Number(size), badge, category);
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    if (ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      setSaveError("Error al guardar. Verificá la conexión.");
+    }
   }
 
   async function handleDelete() {
@@ -91,7 +92,8 @@ function ComboEditor({
           </select>
         </div>
 
-        <button onClick={handleSave} disabled={saving || !dirty}
+        {saveError && <p className="font-sans text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{saveError}</p>}
+        <button onClick={handleSave} disabled={saving}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-sans text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: saved ? "#547d54" : "#1a3325", color: "white" }}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> :
@@ -215,14 +217,24 @@ export default function ViandasCombosAdminPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleSave(id: string, price: number, size: number, badge: string, category: string) {
-    const res = await fetch("/api/admin/viandas-combos", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, price, size, badge, category }),
-    });
-    const data = await res.json();
-    if (res.ok) setCombos((prev) => prev.map((c) => (c.id === id ? data : c)));
+  async function handleSave(id: string, price: number, size: number, badge: string, category: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/viandas-combos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, price, size, badge, category }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCombos((prev) => prev.map((c) => (c.id === id ? data : c)));
+        return true;
+      }
+      console.error("Error guardando combo:", data.error);
+      return false;
+    } catch (e) {
+      console.error("Error de red:", e);
+      return false;
+    }
   }
 
   async function handleDelete(id: string) {

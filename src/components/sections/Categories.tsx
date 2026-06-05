@@ -195,8 +195,12 @@ export default function Categories() {
           </div>
 
           <div className="flex justify-center gap-4 mb-6 flex-wrap">
-            {viandasCombos.filter((c) => activeComboCategory === "all" || (c.category || "viandas") === activeComboCategory).map((combo) => (
-              <Link key={combo.id} href={`/tienda/combo-viandas?size=${combo.size}`} className="group block w-40 md:w-48">
+            {viandasCombos.filter((c) => activeComboCategory === "all" || (c.category || "viandas") === activeComboCategory).map((combo) => {
+              const href = (combo.category || "viandas") === "tartas"
+                ? `/tienda/combo-tartas?size=${combo.size}`
+                : `/tienda/combo-viandas?size=${combo.size}`;
+              return (
+              <Link key={combo.id} href={href} className="group block w-40 md:w-48">
                 <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
                   <div className="px-4 py-5 relative" style={{ background: "#1a3325" }}>
                     <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
@@ -206,16 +210,24 @@ export default function Categories() {
                     <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "2.4rem" }}>
                       ×{combo.size}
                     </p>
-                    <p className="font-sans text-white/50 text-[10px] mt-1">viandas congeladas</p>
+                    <p className="font-sans text-white/50 text-[10px] mt-1">
+                      {(combo.category || "viandas") === "tartas" ? "tartas" : "viandas congeladas"}
+                    </p>
                   </div>
-                  <div className="px-4 py-3 bg-white flex items-center justify-center">
+                  <div className="px-4 py-3 bg-white flex items-center justify-between">
+                    {(combo.category || "viandas") === "tartas" ? (
+                      <span className="font-sans text-[9px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Tartas</span>
+                    ) : (
+                      <span className="font-sans text-[9px] font-semibold text-sage-600 bg-sage-50 px-2 py-0.5 rounded-full border border-sage-200">Congeladas</span>
+                    )}
                     <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
-                      Armar combo <ArrowRight className="w-3 h-3" />
+                      Armar <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
 
           <Link href="/tienda/viandas/viandas-congeladas" className="inline-flex items-center gap-1.5 font-sans text-xs hover:opacity-70 transition-opacity" style={{ color: "#9A8B6E" }}>

@@ -376,8 +376,12 @@ export default function TiendaPage() {
                   </div>
 
                   <div className="flex gap-4 flex-wrap">
-                    {filtered.map((vc) => (
-                      <Link key={vc.id} href={`/tienda/combo-viandas?size=${vc.size}`} className="group block w-44 md:w-52">
+                    {filtered.map((vc) => {
+                      const href = (vc.category || "viandas") === "tartas"
+                        ? `/tienda/combo-tartas?size=${vc.size}`
+                        : `/tienda/combo-viandas?size=${vc.size}`;
+                      return (
+                      <Link key={vc.id} href={href} className="group block w-44 md:w-52">
                         <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
                           <div className="px-5 py-6 relative" style={{ background: "#1a3325" }}>
                             <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
@@ -390,14 +394,22 @@ export default function TiendaPage() {
                             <p className="font-sans text-white/50 text-[10px] mt-1">{LABEL[vc.category ?? "viandas"] ?? vc.category}</p>
                           </div>
                           <div className="px-4 py-3 bg-white flex items-center justify-between">
-                            <span className="font-sans text-sm font-semibold text-stone-700">{formatPrice(vc.price)}</span>
+                            <div className="flex flex-col gap-0.5">
+                              {(vc.category || "viandas") === "tartas" ? (
+                                <span className="font-sans text-[9px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 w-fit">Tartas</span>
+                              ) : (
+                                <span className="font-sans text-[9px] font-semibold text-sage-600 bg-sage-50 px-2 py-0.5 rounded-full border border-sage-200 w-fit">Congeladas</span>
+                              )}
+                              <span className="font-sans text-sm font-semibold text-stone-700">{formatPrice(vc.price)}</span>
+                            </div>
                             <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
                               Armar <ArrowRight className="w-3 h-3" />
                             </span>
                           </div>
                         </div>
                       </Link>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );

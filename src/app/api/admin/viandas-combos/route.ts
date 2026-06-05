@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest) {
   if (authError) return authError;
 
   const body = await req.json();
-  const { id, price, size, badge } = body;
+  const { id, price, size, badge, category } = body;
 
   if (!id) return NextResponse.json({ error: "id requerido" }, { status: 400 });
 
@@ -30,6 +30,7 @@ export async function PATCH(req: NextRequest) {
   if (price !== undefined) updates.price = Number(price);
   if (size !== undefined) updates.size = Number(size);
   if (badge !== undefined) updates.badge = badge;
+  if (category !== undefined) updates.category = category;
 
   const { data, error } = await supabaseAdmin
     .from("viandas_combos")
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const { size, price, badge } = await req.json();
+  const { size, price, badge, category } = await req.json();
   if (!size || !price || !badge)
     return NextResponse.json({ error: "size, price y badge son requeridos" }, { status: 400 });
 
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabaseAdmin
     .from("viandas_combos")
-    .insert({ id, size: Number(size), price: Number(price), badge, updated_at: new Date().toISOString() })
+    .insert({ id, size: Number(size), price: Number(price), badge, category: category ?? "viandas", updated_at: new Date().toISOString() })
     .select()
     .single();
 

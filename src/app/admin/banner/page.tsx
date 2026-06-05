@@ -8,7 +8,7 @@ import {
   CheckCircle2, XCircle, Info, Eye, EyeOff,
 } from "lucide-react";
 
-type Banner = { id: string; image_url: string | null; active: boolean };
+type Banner = { id: string; image_url: string | null; active: boolean; heading_text: string | null; subheading_text: string | null };
 
 const SPECS = [
   { label: "Tamaño mínimo", value: "1200 × 400 px" },
@@ -89,7 +89,13 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
       const res = await fetch("/api/admin/banner", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: config.id, image_url: banner.image_url, active: banner.active }),
+        body: JSON.stringify({
+          id: config.id,
+          image_url: banner.image_url,
+          active: banner.active,
+          heading_text: banner.heading_text,
+          subheading_text: banner.subheading_text,
+        }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -201,6 +207,32 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
       </div>
 
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
+
+      {/* Texto overlay */}
+      <div className="px-5 pb-5 border-t border-gray-100 pt-5 space-y-4">
+        <p className="font-sans text-xs font-semibold text-gray-400 uppercase tracking-wider">Texto del hero</p>
+        <div>
+          <label className="block font-sans text-sm font-medium text-gray-600 mb-1.5">Título</label>
+          <input
+            type="text"
+            value={banner?.heading_text ?? ""}
+            onChange={(e) => setBanner((b) => b ? { ...b, heading_text: e.target.value || null } : b)}
+            placeholder="Ej: Viandas saludables, para todas tus metas."
+            className="w-full font-sans text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sage-300 focus:border-transparent placeholder:text-gray-300"
+          />
+          <p className="font-sans text-xs text-gray-400 mt-1">Dejá vacío para usar el texto por defecto del sitio.</p>
+        </div>
+        <div>
+          <label className="block font-sans text-sm font-medium text-gray-600 mb-1.5">Subtítulo</label>
+          <input
+            type="text"
+            value={banner?.subheading_text ?? ""}
+            onChange={(e) => setBanner((b) => b ? { ...b, subheading_text: e.target.value || null } : b)}
+            placeholder="Ej: Palermo & Villa Crespo · Buenos Aires"
+            className="w-full font-sans text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sage-300 focus:border-transparent placeholder:text-gray-300"
+          />
+        </div>
+      </div>
 
       {/* Toast */}
       <AnimatePresence>

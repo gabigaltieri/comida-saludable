@@ -35,8 +35,8 @@ function ComboViandasContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
   const rawSize = parseInt(searchParams.get("size") ?? "10", 10);
-  const targetSize = rawSize === 20 ? 20 : 10;
-  const comboPrice = comboPrices[targetSize] ?? FIXED_PRICE_FALLBACK[targetSize];
+  const targetSize = rawSize > 0 ? rawSize : 10;
+  const comboPrice = comboPrices[targetSize] ?? FIXED_PRICE_FALLBACK[targetSize] ?? 85000;
   const { addCombo, replaceCombo, openCart } = useCart();
 
   // Cargar precios dinámicos
@@ -46,8 +46,10 @@ function ComboViandasContent() {
       .then((data) => {
         if (Array.isArray(data)) {
           const map: Record<number, number> = {};
-          data.forEach((c: { size: number; price: number }) => { map[c.size] = c.price; });
-          setComboPrices(map);
+          data
+            .filter((c: { category?: string }) => (c.category || "viandas") === "viandas")
+            .forEach((c: { size: number; price: number }) => { map[c.size] = c.price; });
+          if (Object.keys(map).length > 0) setComboPrices(map);
         }
       })
       .catch(() => { /* usa fallback */ });
