@@ -43,9 +43,15 @@ function loadCart<T>(key: string, fallback: T): T {
 }
 
 export function useCartState(): CartState {
-  const [items, setItems] = useState<CartItem[]>(() => loadCart("cart_items", []));
-  const [comboItems, setComboItems] = useState<ComboCartItem[]>(() => loadCart("cart_combos", []));
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [comboItems, setComboItems] = useState<ComboCartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Cargar localStorage solo en el cliente, después de hidratación
+  useEffect(() => {
+    setItems(loadCart("cart_items", []));
+    setComboItems(loadCart("cart_combos", []));
+  }, []);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);

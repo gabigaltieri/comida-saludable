@@ -22,19 +22,36 @@ import Footer from "@/components/Footer";
 import { Product } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
-const FIXED_PRICE: Record<number, number> = { 10: 85000, 20: 164000 };
+const FIXED_PRICE_FALLBACK: Record<number, number> = { 10: 85000, 20: 164000 };
 
 function ComboViandasContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Map<string, number>>(new Map());
   const [search, setSearch] = useState("");
+  const [subcats, setSubcats] = useState<{ id: string; name: string }[]>([]);
+  const [activeSubcat, setActiveSubcat] = useState<string>("all");
+  const [comboPrices, setComboPrices] = useState<Record<number, number>>(FIXED_PRICE_FALLBACK);
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
   const rawSize = parseInt(searchParams.get("size") ?? "10", 10);
   const targetSize = rawSize === 20 ? 20 : 10;
-  const comboPrice = FIXED_PRICE[targetSize];
+  const comboPrice = comboPrices[targetSize] ?? FIXED_PRICE_FALLBACK[targetSize];
   const { addCombo, replaceCombo, openCart } = useCart();
+
+  // Cargar precios dinámicos
+  useEffect(() => {
+    fetch("/api/viandas-combos")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const map: Record<number, number> = {};
+          data.forEach((c: { size: number; price: number }) => { map[c.size] = c.price; });
+          setComboPrices(map);
+        }
+      })
+      .catch(() => { /* usa fallback */ });
+  }, []);
 
   // Solo productos de viandas congeladas
   useEffect(() => {
@@ -44,6 +61,18 @@ function ComboViandasContent() {
         setProducts(all.filter((p) => p.category === "viandas-congeladas" && p.available))
       )
       .finally(() => setLoading(false));
+  }, []);
+
+  // Subcategorías de viandas congeladas
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((cats: { slug?: string; subcategories?: { id: string; name: string }[] }[]) => {
+        if (!Array.isArray(cats)) return;
+        const congeladas = cats.find((c) => c.slug === "viandas-congeladas");
+        setSubcats(congeladas?.subcategories ?? []);
+      })
+      .catch(() => {});
   }, []);
 
   // Restaurar selección al editar
@@ -72,9 +101,15 @@ function ComboViandasContent() {
   const isComplete = totalUnits === targetSize;
   const isOver = totalUnits > targetSize;
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    if (activeSubcat === "all") return true;
+    const sub = subcats.find((s) => s.id === activeSubcat);
+    if (!sub) return true;
+    if (p.subcategory_id) return p.subcategory_id === sub.id;
+    return (p.name + " " + p.tags.join(" ")).toLowerCase().includes(sub.name.toLowerCase());
+  });
 
   const updateQty = (id: string, delta: number) => {
     const curr = selected.get(id) ?? 0;
@@ -250,6 +285,27 @@ function ComboViandasContent() {
 
           {/* ── Grid de productos ── */}
           <div className="flex-1 min-w-0">
+            {/* Filtros de subcategoría */}
+            {subcats.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap mb-4">
+                <button
+                  onClick={() => setActiveSubcat("all")}
+                  className={`px-3 py-1.5 rounded-full font-sans text-xs font-medium transition-all ${activeSubcat === "all" ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                >
+                  Todas
+                </button>
+                {subcats.map((sub) => (
+                  <button
+                    key={sub.id}
+                    onClick={() => setActiveSubcat(sub.id)}
+                    className={`px-3 py-1.5 rounded-full font-sans text-xs font-medium transition-all ${activeSubcat === sub.id ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                  >
+                    {sub.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <input
               type="text"
               placeholder="Buscar vianda..."

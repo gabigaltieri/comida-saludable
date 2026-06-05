@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Hero from "@/components/sections/Hero";
 import Categories from "@/components/sections/Categories";
+import CategoryCards from "@/components/sections/CategoryCards";
 import MenuSection from "@/components/sections/MenuSection";
 import AboutSection from "@/components/sections/AboutSection";
 import NosotrosSection from "@/components/sections/NosotrosSection";
@@ -26,11 +27,12 @@ export default function HomePage() {
 
         <main>
           <Hero />
-          <Categories />
-          <MenuSection />
+          <CategoryCards />
+          <MenuSection initialCategory="viandas-congeladas" />
           <HowToOrder />
           <LocationSection />
           <AboutSection />
+          <Categories />
           <Reviews />
           <NosotrosSection />
           <FaqSection />

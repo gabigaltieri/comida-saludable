@@ -83,7 +83,7 @@ function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
 
 export default function FaqSection() {
   return (
-    <section className="py-24 md:py-32" style={{ background: "#EDEAE4" }}>
+    <section id="faq" className="py-24 md:py-32 scroll-mt-24" style={{ background: "#EDEAE4" }}>
       <div className="max-w-3xl mx-auto px-5 md:px-8">
 
         {/* Header */}

@@ -7,7 +7,7 @@ import { Product } from "@/lib/data";
 import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 
-type SubcategoryItem = { id: string; name: string };
+type SubcategoryItem = { id: string; name: string; slug: string };
 
 export default function MenuSection({ initialCategory }: { initialCategory?: string }) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,12 +24,15 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
       setLoading(false);
     });
 
-    // Cargar subcategorías para construir los botones de filtro
+    // Cargar subcategorías — solo de la categoría activa si se pasó initialCategory
     fetch("/api/categories")
       .then((r) => r.json())
-      .then((cats: { subcategories?: SubcategoryItem[] }[]) => {
+      .then((cats: { slug?: string; subcategories?: SubcategoryItem[] }[]) => {
         if (!Array.isArray(cats)) return;
-        const subs = cats.flatMap((c) => c.subcategories ?? []);
+        const relevantCats = initialCategory
+          ? cats.filter((c) => c.slug === initialCategory)
+          : cats;
+        const subs = relevantCats.flatMap((c) => c.subcategories ?? []);
         setFilterSubs(subs);
       })
       .catch(() => {});
@@ -41,20 +44,36 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
     }
   }, [initialCategory]);
 
-  // Solo mostrar subcategorías que tienen al menos un producto
-  const usedSubIds = new Set(products.map((p) => p.subcategory_id).filter(Boolean) as string[]);
-  const visibleSubs = filterSubs.filter((s) => usedSubIds.has(s.id));
+  const categoryProducts = initialCategory
+    ? products.filter((p) => p.category === initialCategory)
+    : products;
 
-  const filtered = products.filter((p) => {
-    const matchesCat = !initialCategory || p.category === initialCategory;
-    const matchesSub = selectedSub === "all" || p.subcategory_id === selectedSub;
+  // Subcategorías que tienen al menos 1 producto (por id directo o keyword)
+  const visibleSubs = filterSubs.filter((sub) =>
+    categoryProducts.some((p) => {
+      if (p.subcategory_id) return p.subcategory_id === sub.id;
+      const hay = (p.name + " " + p.tags.join(" ")).toLowerCase();
+      const kw = sub.name.toLowerCase();
+      return kw && hay.includes(kw);
+    })
+  );
+
+  const activeSub = selectedSub === "all" ? null : (filterSubs.find((s) => s.id === selectedSub) ?? null);
+
+  const filtered = categoryProducts.filter((p) => {
+    if (activeSub !== null) {
+      const matches = p.subcategory_id
+        ? p.subcategory_id === activeSub.id
+        : (p.name + " " + p.tags.join(" ")).toLowerCase().includes(activeSub.name.toLowerCase());
+      if (!matches) return false;
+    }
     const q = searchQuery.toLowerCase();
-    const matchesSearch =
+    return (
       !q ||
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q) ||
-      p.tags.some((t) => t.toLowerCase().includes(q));
-    return matchesCat && matchesSub && matchesSearch;
+      p.tags.some((t) => t.toLowerCase().includes(q))
+    );
   });
 
   return (

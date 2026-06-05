@@ -14,10 +14,9 @@ import { Product } from "@/lib/data";
 type FormEmpresas = { nombre: string; apellido: string; mail: string; telefono: string; consulta: string };
 type FormCatering = { nombre: string; apellido: string; mail: string; telefono: string; mensaje: string };
 
-/* ── datos estáticos ── */
-const COMBOS = [
-  { size: 10, badge: "Ideal para la semana", price: "$85.000", href: "/tienda/combo-viandas?size=10" },
-  { size: 20, badge: "Mejor precio",          price: "$164.000", href: "/tienda/combo-viandas?size=20" },
+const COMBOS_FALLBACK = [
+  { id: "combo-10", size: 10, badge: "Ideal para la semana", price: 85000 },
+  { id: "combo-20", size: 20, badge: "Mejor precio",          price: 164000 },
 ];
 
 const EMPRESAS_BENEFITS = [
@@ -66,6 +65,16 @@ export default function Categories() {
   const [empSending, setEmpSending] = useState(false);
   const [empSent, setEmpSent] = useState(false);
   const [empError, setEmpError] = useState("");
+
+  /* combos de viandas congeladas (dinámicos) */
+  const [viandasCombos, setViandasCombos] = useState<{ id: string; size: number; price: number; badge: string; category?: string }[]>(COMBOS_FALLBACK);
+  const [activeComboCategory, setActiveComboCategory] = useState<string>("all");
+  useEffect(() => {
+    fetch("/api/viandas-combos")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data) && data.length > 0) setViandasCombos(data); })
+      .catch(() => {});
+  }, []);
 
   /* productos viandas diarias para el carrusel */
   const [diarias, setDiarias] = useState<Product[]>([]);
@@ -171,9 +180,23 @@ export default function Categories() {
             Elegí tu combo
           </p>
 
-          <div className="flex justify-center gap-4 mb-6">
-            {COMBOS.map((combo) => (
-              <Link key={combo.size} href={combo.href} className="group block w-40 md:w-48">
+          {/* Filtros por tipo de combo */}
+          <div className="flex justify-center gap-2 flex-wrap mb-5">
+            {[
+              { key: "all",     label: "Todos" },
+              { key: "viandas", label: "Viandas Congeladas" },
+              { key: "tartas",  label: "Tartas" },
+            ].map(({ key, label }) => (
+              <button key={key} onClick={() => setActiveComboCategory(key)}
+                className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeComboCategory === key ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-4 mb-6 flex-wrap">
+            {viandasCombos.filter((c) => activeComboCategory === "all" || (c.category || "viandas") === activeComboCategory).map((combo) => (
+              <Link key={combo.id} href={`/tienda/combo-viandas?size=${combo.size}`} className="group block w-40 md:w-48">
                 <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
                   <div className="px-4 py-5 relative" style={{ background: "#1a3325" }}>
                     <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />

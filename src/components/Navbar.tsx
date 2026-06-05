@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShoppingBag, Menu, X, Instagram, Store, UserCircle2, LogOut, ChevronDown } from "lucide-react";
+import { ShoppingBag, Menu, X, Instagram, Store, UserCircle2, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart";
@@ -13,14 +13,9 @@ const navLinks = [
   { label: "Nuestras opciones", href: "#nuestras-opciones" },
   { label: "Nosotros", href: "#about" },
   { label: "Contacto", href: "#location" },
+  { label: "FAQs", href: "#faq" },
 ];
 
-const viandaLinks = [
-  { label: "Viandas Congeladas",    href: "#viandas-congeladas" },
-  { label: "Viandas Diarias",       href: "#viandas-diarias" },
-  { label: "Viandas para Empresas", href: "#viandas-empresas" },
-  { label: "Catering para Eventos", href: "#catering-eventos" },
-];
 
 export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
   const { itemCount } = useCart();
@@ -92,26 +87,6 @@ export default function Navbar({ onCartOpen }: { onCartOpen: () => void }) {
               </li>
             ))}
 
-            {/* Viandas dropdown — hover */}
-            <li className="relative group/viandas">
-              <button className={`flex items-center gap-1 font-sans text-sm transition-colors duration-300 ${scrolled ? "text-sage-700 hover:text-sage-500" : "text-white hover:text-white/70"}`}>
-                Viandas
-                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/viandas:rotate-180" />
-              </button>
-              <div className="absolute left-0 top-full pt-3 hidden group-hover/viandas:block">
-                <div className="w-52 bg-white rounded-2xl shadow-lg border border-sage-100 overflow-hidden py-1">
-                  {viandaLinks.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      className="block px-4 py-2.5 font-sans text-sm text-sage-700 hover:bg-sage-50 hover:text-sage-900 transition-colors"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </li>
           </ul>
 
           {/* Right actions */}

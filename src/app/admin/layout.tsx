@@ -16,9 +16,9 @@ import {
   Gift,
   Layers,
   Users,
-  Tag,
   ImageIcon,
   Megaphone,
+  Snowflake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +29,7 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorías", icon: Layers },
   { href: "/admin/pedidos", label: "Pedidos", icon: ClipboardList },
   { href: "/admin/leads", label: "Consultas", icon: Users },
-  { href: "/admin/tags", label: "Etiquetas", icon: Tag },
+  { href: "/admin/viandas-combos", label: "Combos Viandas", icon: Snowflake },
   { href: "/admin/banner", label: "Banner", icon: ImageIcon },
   { href: "/admin/anuncio", label: "Anuncio", icon: Megaphone },
 ];

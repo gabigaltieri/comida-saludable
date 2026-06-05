@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Product, WHATSAPP_NUMBER } from "@/lib/data";
+import { Product, Combo, WHATSAPP_NUMBER } from "@/lib/data";
+import ComboCard from "@/components/ComboCard";
 import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
@@ -256,20 +257,36 @@ export default function TiendaPage() {
   const [bannerSubheading, setBannerSubheading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSubcatId, setActiveSubcatId] = useState<string | null>(null);
+  const [showOnlyCombos, setShowOnlyCombos] = useState(false);
+  const [combos, setCombos] = useState<Combo[]>([]);
+  const [viandasCombos, setViandasCombos] = useState<{ id: string; size: number; price: number; badge: string; category: string }[]>([
+    { id: "combo-10", size: 10, price: 85000, badge: "Ideal para la semana", category: "viandas" },
+    { id: "combo-20", size: 20, price: 164000, badge: "Mejor precio", category: "viandas" },
+  ]);
+  const [activeComboCategory, setActiveComboCategory] = useState<string>("all");
 
   useEffect(() => { window.scrollTo({ top: 0 }); }, []);
+
+  useEffect(() => {
+    fetch("/api/viandas-combos")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data) && data.length > 0) setViandasCombos(data); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     Promise.all([
       getProducts(),
       fetch("/api/categories").then((r) => r.json()),
       fetch("/api/banner?id=tienda-hero").then((r) => r.json()),
-    ]).then(([prods, cats, banner]) => {
+      fetch("/api/combos").then((r) => r.json()),
+    ]).then(([prods, cats, banner, combosData]) => {
       setProducts(prods);
       if (Array.isArray(cats)) setCategories(cats);
       if (banner?.active && banner?.image_url) setBannerUrl(banner.image_url);
       if (banner?.heading_text) setBannerHeading(banner.heading_text);
       if (banner?.subheading_text) setBannerSubheading(banner.subheading_text);
+      if (Array.isArray(combosData)) setCombos(combosData);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -314,7 +331,7 @@ export default function TiendaPage() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
             className="font-sans text-white/40 text-sm max-w-md mx-auto"
           >
-            {bannerSubheading ?? "Elegí tus viandas, armá tu pedido y lo coordinamos por WhatsApp."}
+            {bannerSubheading ?? "Elegí tus viandas, armá tu pedido y empezá a disfrutar."}
           </motion.p>
         </div>
       </div>
@@ -329,44 +346,62 @@ export default function TiendaPage() {
         ) : (
           <>
             {/* ── Combos ── */}
-            <div className="mb-14">
-              <p className="font-sans text-xs uppercase tracking-[0.35em] mb-3" style={{ color: "#547d54" }}>Con carrito</p>
-              <h2
-                className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
-                style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
-              >
-                Nuestros{" "}
-                <em className="italic font-normal" style={{ color: "#D4B882" }}>combos</em>
-              </h2>
-              <div className="h-px mb-8" style={{ background: "linear-gradient(to right, #547d54, transparent)" }} />
-              <div className="flex gap-4">
-                {[
-                  { size: 10, badge: "Ideal para la semana", price: "$85.000", href: "/tienda/combo-viandas?size=10" },
-                  { size: 20, badge: "Mejor precio",          price: "$164.000", href: "/tienda/combo-viandas?size=20" },
-                ].map((combo) => (
-                  <Link key={combo.size} href={combo.href} className="group block w-44 md:w-52">
-                    <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
-                      <div className="px-5 py-6 relative" style={{ background: "#1a3325" }}>
-                        <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
-                        <span className="inline-block font-sans text-[9px] uppercase tracking-widest text-white/50 bg-white/10 px-2 py-0.5 rounded-full mb-3">
-                          {combo.badge}
-                        </span>
-                        <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "2.4rem" }}>
-                          ×{combo.size}
-                        </p>
-                        <p className="font-sans text-white/50 text-[10px] mt-1">viandas congeladas</p>
-                      </div>
-                      <div className="px-4 py-3 bg-white flex items-center justify-between">
-                        <span className="font-sans text-sm font-semibold text-stone-700">{combo.price}</span>
-                        <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
-                          Armar <ArrowRight className="w-3 h-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            {(() => {
+              const comboCategories = Array.from(new Set(viandasCombos.map((c) => c.category || "viandas")));
+              const filtered = activeComboCategory === "all"
+                ? viandasCombos
+                : viandasCombos.filter((c) => (c.category || "viandas") === activeComboCategory);
+              const LABEL: Record<string, string> = { viandas: "Viandas Congeladas", tartas: "Tartas" };
+              return (
+                <div className="mb-14">
+                  <p className="font-sans text-xs uppercase tracking-[0.35em] mb-3" style={{ color: "#547d54" }}>Con carrito</p>
+                  <h2 className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}>
+                    Nuestros{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>combos</em>
+                  </h2>
+                  <div className="h-px mb-6" style={{ background: "linear-gradient(to right, #547d54, transparent)" }} />
+
+                  {/* Filtros por tipo */}
+                  <div className="flex items-center gap-2 flex-wrap mb-6">
+                    {[
+                      { key: "all",     label: "Todos" },
+                      { key: "viandas", label: "Viandas Congeladas" },
+                      { key: "tartas",  label: "Tartas" },
+                    ].map(({ key, label }) => (
+                      <button key={key} onClick={() => setActiveComboCategory(key)}
+                        className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeComboCategory === key ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-4 flex-wrap">
+                    {filtered.map((vc) => (
+                      <Link key={vc.id} href={`/tienda/combo-viandas?size=${vc.size}`} className="group block w-44 md:w-52">
+                        <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
+                          <div className="px-5 py-6 relative" style={{ background: "#1a3325" }}>
+                            <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
+                            <span className="inline-block font-sans text-[9px] uppercase tracking-widest text-white/50 bg-white/10 px-2 py-0.5 rounded-full mb-3">
+                              {vc.badge}
+                            </span>
+                            <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "2.4rem" }}>
+                              ×{vc.size}
+                            </p>
+                            <p className="font-sans text-white/50 text-[10px] mt-1">{LABEL[vc.category ?? "viandas"] ?? vc.category}</p>
+                          </div>
+                          <div className="px-4 py-3 bg-white flex items-center justify-between">
+                            <span className="font-sans text-sm font-semibold text-stone-700">{formatPrice(vc.price)}</span>
+                            <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
+                              Armar <ArrowRight className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* ── Divisor ── */}
             <div className="my-10 flex items-center gap-4">
@@ -375,33 +410,41 @@ export default function TiendaPage() {
               <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
             </div>
 
-            {/* ── Filtros de subcategoría ── */}
+            {/* ── Filtros de subcategoría + Combos ── */}
             {(() => {
               const congeladas = categories.find((c) => c.slug === "viandas-congeladas");
               if (!congeladas || congeladas.subcategories.length === 0) return null;
               return (
                 <div className="flex items-center gap-2 flex-wrap mb-8">
                   <button
-                    onClick={() => setActiveSubcatId(null)}
-                    className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeSubcatId === null ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                    onClick={() => { setActiveSubcatId(null); setShowOnlyCombos(false); }}
+                    className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${!showOnlyCombos && activeSubcatId === null ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
                   >
                     Todas
                   </button>
                   {congeladas.subcategories.map((sub) => (
                     <button
                       key={sub.id}
-                      onClick={() => setActiveSubcatId(sub.id)}
-                      className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${activeSubcatId === sub.id ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
+                      onClick={() => { setActiveSubcatId(sub.id); setShowOnlyCombos(false); }}
+                      className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${!showOnlyCombos && activeSubcatId === sub.id ? "bg-sage-800 text-white shadow-sm" : "bg-white text-sage-700 hover:bg-sage-50 border border-sage-200"}`}
                     >
                       {sub.name}
                     </button>
                   ))}
+                  {combos.length > 0 && (
+                    <button
+                      onClick={() => { setShowOnlyCombos(true); setActiveSubcatId(null); }}
+                      className={`px-4 py-1.5 rounded-full font-sans text-sm font-medium transition-all ${showOnlyCombos ? "bg-amber-500 text-white shadow-sm" : "bg-white text-amber-600 hover:bg-amber-50 border border-amber-200"}`}
+                    >
+                      🎁 Combos armados
+                    </button>
+                  )}
                 </div>
               );
             })()}
 
             {/* ── Productos ── */}
-            {categories
+            {!showOnlyCombos && categories
               .filter((c) => c.slug === "viandas-congeladas")
               .map((category) => (
                 <CategorySection
@@ -413,6 +456,49 @@ export default function TiendaPage() {
                 />
               ))
             }
+
+            {/* ── Combos armados ── */}
+            {combos.length > 0 && !showOnlyCombos && (
+              <div className="my-10 flex items-center gap-4">
+                <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
+                <span className="font-sans text-xs uppercase tracking-[0.3em] text-sage-400">Combos armados</span>
+                <div className="flex-1 h-px" style={{ background: "#c5bfb5" }} />
+              </div>
+            )}
+            {combos.length > 0 && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="mb-8"
+                >
+                  <h2
+                    className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
+                    style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}
+                  >
+                    Combos{" "}
+                    <em className="italic font-normal" style={{ color: "#D4B882" }}>armados</em>
+                  </h2>
+                  <div className="h-px mb-8" style={{ background: "linear-gradient(to right, #547d54, transparent)" }} />
+                </motion.div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+                  {combos.map((combo, i) => (
+                    <motion.div
+                      key={combo.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.07, duration: 0.4 }}
+                    >
+                      <ComboCard combo={combo} products={products} />
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

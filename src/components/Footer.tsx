@@ -19,7 +19,7 @@ export default function Footer() {
               ¿Listo para comer rico?
             </h3>
             <p className="font-sans text-white/60 text-sm">
-              Pedí por WhatsApp y coordinamos entrega o retiro.
+              Pedí por WhatsApp y empezá a disfrutar.
             </p>
           </div>
           <a
