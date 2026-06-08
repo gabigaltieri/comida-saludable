@@ -55,7 +55,7 @@ export default function MenuSection({ initialCategory }: { initialCategory?: str
 
   const activeSub = selectedSub === "all" ? null : (filterSubs.find((s) => s.id === selectedSub) ?? null);
 
-  const filtered = categoryProducts.filter((p) => {
+  const filtered = categoryProducts.sort((a, b) => a.name.localeCompare(b.name, "es")).filter((p) => {
     if (activeSub !== null) {
       const matches = p.subcategory_id
         ? p.subcategory_id === activeSub.id
