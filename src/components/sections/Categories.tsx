@@ -81,7 +81,7 @@ export default function Categories() {
     fetch("/api/products")
       .then((r) => r.json())
       .then((all: Product[]) => {
-        const filtered = all.filter((p) => p.category === "viandas-diarias" && p.available);
+        const filtered = all.filter((p) => p.category === "viandas-diarias" && p.available).sort((a, b) => a.name.localeCompare(b.name, "es"));
         // garantizar al menos 6 items duplicando si hace falta
         if (filtered.length === 0) return;
         let items = [...filtered];
