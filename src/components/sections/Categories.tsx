@@ -181,22 +181,22 @@ export default function Categories() {
 
           <div className="flex justify-center gap-4 mb-6 flex-wrap">
             {viandasCombos.filter((c) => (c.category || "viandas") === "viandas").map((combo) => (
-              <Link key={combo.id} href={`/tienda/combo-viandas?size=${combo.size}`} className="group block w-40 md:w-48">
-                <div className="rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
-                  <div className="px-4 py-5 relative" style={{ background: "#1a3325" }}>
-                    <Snowflake className="absolute top-3 right-3 w-3.5 h-3.5 text-white/20" />
-                    <span className="inline-block font-sans text-[9px] uppercase tracking-widest text-white/50 bg-white/10 px-2 py-0.5 rounded-full mb-3">
+              <Link key={combo.id} href={`/tienda/combo-viandas?size=${combo.size}`} className="group block w-52 md:w-64">
+                <div className="rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
+                  <div className="px-6 py-7 relative" style={{ background: "#1a3325" }}>
+                    <Snowflake className="absolute top-4 right-4 w-4 h-4 text-white/30" />
+                    <span className="inline-block font-sans text-[10px] uppercase tracking-widest text-white/80 bg-white/15 px-3 py-1 rounded-full mb-4">
                       {combo.badge}
                     </span>
-                    <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "2.4rem" }}>
+                    <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "3.2rem" }}>
                       ×{combo.size}
                     </p>
-                    <p className="font-sans text-white/50 text-[10px] mt-1">viandas congeladas</p>
+                    <p className="font-sans text-white/70 text-xs mt-2">viandas congeladas</p>
                   </div>
-                  <div className="px-4 py-3 bg-white flex items-center justify-between">
-                    <span className="font-sans text-[9px] font-semibold text-sage-600 bg-sage-50 px-2 py-0.5 rounded-full border border-sage-200">Congeladas</span>
-                    <span className="font-sans text-[10px] text-stone-400 group-hover:text-stone-700 transition-colors flex items-center gap-0.5">
-                      Armar <ArrowRight className="w-3 h-3" />
+                  <div className="px-5 py-4 bg-white flex items-center justify-between">
+                    <span className="font-sans text-[10px] font-semibold text-sage-700 bg-sage-100 px-2.5 py-1 rounded-full border border-sage-300">Congeladas</span>
+                    <span className="font-sans text-xs font-medium text-stone-500 group-hover:text-stone-800 transition-colors flex items-center gap-1">
+                      Armar <ArrowRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </div>
