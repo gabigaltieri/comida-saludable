@@ -352,7 +352,7 @@ export default function TiendaPage() {
                   <p className="font-sans text-xs uppercase tracking-[0.35em] mb-3" style={{ color: "#547d54" }}>Con carrito</p>
                   <h2 className="font-serif font-light text-4xl md:text-5xl leading-tight mb-3"
                     style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#1e2e1f" }}>
-                    Nuestros{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>combos</em>
+                    <em className="italic font-normal" style={{ color: "#D4B882" }}>Combos</em>
                   </h2>
                   <div className="h-px mb-6" style={{ background: "linear-gradient(to right, #547d54, transparent)" }} />
 
