@@ -1,23 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowRight, Snowflake, User, Mail, Phone,
-  MessageCircle, CheckCircle2, Loader2, Send, ShoppingBag,
+  User, Mail, Phone,
+  MessageCircle, CheckCircle2, Loader2, Send,
 } from "lucide-react";
-import { Product } from "@/lib/data";
 
 /* ── tipos ── */
 type FormEmpresas = { nombre: string; apellido: string; mail: string; telefono: string; consulta: string };
 type FormCatering = { nombre: string; apellido: string; mail: string; telefono: string; mensaje: string };
-
-const COMBOS_FALLBACK = [
-  { id: "combo-10", size: 10, badge: "Ideal para la semana", price: 85000 },
-  { id: "combo-20", size: 20, badge: "Mejor precio",          price: 164000 },
-];
 
 const EMPRESAS_BENEFITS = [
   "Amplio menú con opciones variadas",
@@ -60,38 +52,11 @@ function SuccessCard({ subtitle }: { subtitle: string }) {
 /* ══════════════════════════════════════════════ */
 export default function Categories() {
 
-  /* estado form empresas */
   const [emp, setEmp] = useState<FormEmpresas>({ nombre: "", apellido: "", mail: "", telefono: "", consulta: "" });
   const [empSending, setEmpSending] = useState(false);
   const [empSent, setEmpSent] = useState(false);
   const [empError, setEmpError] = useState("");
 
-  /* combos de viandas congeladas (dinámicos) */
-  const [viandasCombos, setViandasCombos] = useState<{ id: string; size: number; price: number; badge: string; category?: string }[]>(COMBOS_FALLBACK);
-  useEffect(() => {
-    fetch("/api/viandas-combos")
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data) && data.length > 0) setViandasCombos(data); })
-      .catch(() => {});
-  }, []);
-
-  /* productos viandas diarias para el carrusel */
-  const [diarias, setDiarias] = useState<Product[]>([]);
-  useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((all: Product[]) => {
-        const filtered = all.filter((p) => p.category === "viandas-diarias" && p.available).sort((a, b) => a.name.localeCompare(b.name, "es"));
-        // garantizar al menos 6 items duplicando si hace falta
-        if (filtered.length === 0) return;
-        let items = [...filtered];
-        while (items.length < 6) items = [...items, ...filtered];
-        setDiarias(items);
-      })
-      .catch(() => {});
-  }, []);
-
-  /* estado form catering */
   const [cat, setCat] = useState<FormCatering>({ nombre: "", apellido: "", mail: "", telefono: "", mensaje: "" });
   const [catSending, setCatSending] = useState(false);
   const [catSent, setCatSent] = useState(false);
@@ -135,157 +100,9 @@ export default function Categories() {
     finally { setCatSending(false); }
   }
 
-  /* ── render ── */
   return (
     <section id="nuestras-opciones" className="py-24 md:py-32" style={{ background: "#EDEAE4" }}>
       <div className="max-w-5xl mx-auto px-5 md:px-8">
-
-        {/* ── HEADER ── */}
-        <div className="text-center mb-16">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.6 }}
-            className="font-sans text-xs uppercase tracking-[0.35em] mb-4"
-            style={{ color: "#9A8B6E" }}
-          >
-            Lo que ofrecemos
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif font-light text-3xl md:text-5xl max-w-3xl mx-auto leading-snug"
-            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#2a2a2a" }}
-          >
-            Te presentamos todas las opciones que{" "}
-            <em className="italic font-normal" style={{ color: "#9A8B6E" }}>262</em>{" "}
-            tiene para ofrecerte
-          </motion.h2>
-        </div>
-
-        {/* ── VIANDAS CONGELADAS ── */}
-        <motion.div
-          id="viandas-congeladas"
-          initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center scroll-mt-32"
-        >
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <span className="text-2xl">❄️</span>
-            <h3 className="font-serif text-3xl md:text-4xl" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#2a2a2a" }}>
-              Viandas Congeladas
-            </h3>
-          </div>
-          <p className="font-sans text-[10px] uppercase tracking-widest mb-8" style={{ color: "#9A8B6E" }}>
-            Elegí tu combo
-          </p>
-
-          <div className="flex justify-center gap-4 mb-6 flex-wrap">
-            {viandasCombos.filter((c) => (c.category || "viandas") === "viandas").map((combo) => (
-              <Link key={combo.id} href={`/tienda/combo-viandas?size=${combo.size}`} className="group block w-52 md:w-64">
-                <div className="rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-1">
-                  <div className="px-6 py-7 relative" style={{ background: "#1a3325" }}>
-                    <Snowflake className="absolute top-4 right-4 w-4 h-4 text-white/30" />
-                    <span className="inline-block font-sans text-[10px] uppercase tracking-widest text-white/80 bg-white/15 px-3 py-1 rounded-full mb-4">
-                      {combo.badge}
-                    </span>
-                    <p className="font-serif text-white font-light leading-none" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", fontSize: "3.2rem" }}>
-                      ×{combo.size}
-                    </p>
-                    <p className="font-sans text-white/70 text-xs mt-2">viandas congeladas</p>
-                  </div>
-                  <div className="px-5 py-4 bg-white flex items-center justify-between">
-                    <span className="font-sans text-[10px] font-semibold text-sage-700 bg-sage-100 px-2.5 py-1 rounded-full border border-sage-300">Congeladas</span>
-                    <span className="font-sans text-xs font-medium text-stone-500 group-hover:text-stone-800 transition-colors flex items-center gap-1">
-                      Armar <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <Link href="/tienda/viandas/viandas-congeladas" className="inline-flex items-center gap-1.5 font-sans text-xs hover:opacity-70 transition-opacity" style={{ color: "#9A8B6E" }}>
-            Ver todos los productos <ArrowRight className="w-3 h-3" />
-          </Link>
-        </motion.div>
-
-        <Separator />
-
-        {/* ── VIANDAS DIARIAS ── */}
-        <motion.div
-          id="viandas-diarias"
-          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="scroll-mt-32"
-        >
-          {/* Encabezado centrado */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <span className="text-2xl">🥗</span>
-              <h3 className="font-serif text-3xl md:text-4xl" style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: "#2a2a2a" }}>
-                Viandas Diarias
-              </h3>
-            </div>
-            <p className="font-sans text-base text-stone-500 max-w-md mx-auto leading-relaxed">
-              Opciones frescas para que pases a buscar para el almuerzo de todos los días por nuestro local.
-            </p>
-          </div>
-
-          {/* Carrusel de loop infinito */}
-          {diarias.length > 0 && (
-            <div className="overflow-hidden mb-8 -mx-5 md:-mx-8">
-              <div className="flex animate-marquee" style={{ width: "max-content" }}>
-                {/* Dos copias idénticas para el loop perfecto */}
-                {[...diarias, ...diarias].map((product, i) => (
-                  <Link
-                    key={`${product.id}-${i}`}
-                    href={`/tienda/${product.id}`}
-                    className="flex-shrink-0 w-44 mx-2 group"
-                  >
-                    <div className="rounded-2xl overflow-hidden bg-white shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:-translate-y-0.5">
-                      {/* Imagen */}
-                      <div className="relative h-36 bg-stone-100">
-                        {product.image ? (
-                          <Image
-                            src={product.image}
-                            alt={product.imageAlt || product.name}
-                            fill
-                            className="object-cover"
-                            sizes="176px"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ShoppingBag className="w-8 h-8 text-stone-300" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-                      </div>
-                      {/* Nombre */}
-                      <div className="px-3 py-2.5">
-                        <p className="font-sans text-xs font-medium text-stone-700 line-clamp-2 leading-snug">
-                          {product.name}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Botón ver más */}
-          <div className="text-center">
-            <Link
-              href="/tienda/viandas/viandas-diarias"
-              className="inline-flex items-center gap-2 font-sans text-sm font-medium text-white px-6 py-3 rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90"
-              style={{ background: "#547d54" }}
-            >
-              Ver más opciones <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </motion.div>
-
-        <Separator />
 
         {/* ── VIANDAS PARA EMPRESAS ── */}
         <motion.div
@@ -295,7 +112,6 @@ export default function Categories() {
           className="scroll-mt-32"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* copy */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">🏢</span>
@@ -316,7 +132,6 @@ export default function Categories() {
               </ul>
             </div>
 
-            {/* form */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
               {empSent ? (
                 <SuccessCard subtitle="Nos comunicaremos con vos a la brevedad." />
@@ -369,7 +184,6 @@ export default function Categories() {
           className="scroll-mt-32"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* copy */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl">🎉</span>
@@ -386,7 +200,6 @@ export default function Categories() {
               </p>
             </div>
 
-            {/* form */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
               {catSent ? (
                 <SuccessCard subtitle="Nos comunicaremos con vos para armar tu propuesta." />

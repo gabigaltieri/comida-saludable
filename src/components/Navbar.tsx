@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { INSTAGRAM_HANDLE } from "@/lib/data";
 
 const navLinks = [
-  { label: "Nuestras opciones", href: "#nuestras-opciones" },
+  { label: "Nuestras opciones", href: "/tienda" },
   { label: "Nosotros", href: "#about" },
   { label: "Contacto", href: "#location" },
   { label: "FAQs", href: "#faq" },
