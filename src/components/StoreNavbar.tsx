@@ -27,8 +27,8 @@ export default function StoreNavbar() {
             <Image
               src="/logo.png"
               alt="262 Viandas Saludables"
-              width={44}
-              height={44}
+              width={56}
+              height={56}
               className="rounded-full object-cover transition-opacity duration-300 group-hover:opacity-85 shadow-[0_1px_6px_rgba(0,0,0,0.15)]"
             />
           </Link>
