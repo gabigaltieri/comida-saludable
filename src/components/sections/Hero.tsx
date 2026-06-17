@@ -7,10 +7,9 @@ import Link from "next/link";
 import { ChevronDown, MessageCircle } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/data";
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1547592180-85f173990554?w=1600&q=90";
-
 export default function Hero() {
-  const [bgImage, setBgImage] = useState(FALLBACK_IMAGE);
+  const [bgImage, setBgImage] = useState<string | null>(null);
+  const [imgVisible, setImgVisible] = useState(false);
   const [heading, setHeading] = useState<string | null>(null);
   const [subheading, setSubheading] = useState<string | null>(null);
   const [headingColor, setHeadingColor] = useState<string | null>(null);
@@ -33,66 +32,69 @@ export default function Hero() {
   )}`;
 
   return (
-    <section className="relative h-[55vh] min-h-[400px] flex flex-col overflow-hidden">
+    <section className="relative h-[55vh] min-h-[400px] flex flex-col overflow-hidden bg-white">
 
-      {/* Background image */}
-      <div className="absolute inset-0">
-        <Image
-          src={bgImage}
-          alt="Viandas saludables caseras 262 Cosas Ricas"
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-      </div>
+      {/* Background image — fade in solo cuando termina de cargar */}
+      {bgImage && (
+        <div className="absolute inset-0">
+          <Image
+            src={bgImage}
+            alt="Viandas saludables caseras 262 Cosas Ricas"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            onLoad={() => setImgVisible(true)}
+            style={{ opacity: imgVisible ? 1 : 0, transition: "opacity 0.6s ease" }}
+          />
+        </div>
+      )}
 
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5">
+      <div className="relative z-10 flex-1 flex flex-col items-center text-center px-5">
 
-        <motion.span
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="font-sans text-[11px] uppercase tracking-[0.35em] block mb-4"
-          style={{ color: subheadingColor ?? "rgba(255,255,255,0.5)" }}
-        >
-          {subheading ?? "Palermo & Villa Crespo · Buenos Aires"}
-        </motion.span>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif font-light leading-[1.08] mb-6 max-w-3xl"
-          style={{
-            fontFamily: "var(--font-cormorant, Georgia, serif)",
-            fontSize: "clamp(2.2rem, 5vw, 4rem)",
-            color: headingColor ?? "#FFFFFF",
-          }}
-        >
-          {heading ?? (
-            <>
-              Viandas saludables,
-              <br />
-              para todas tus{" "}
-              <em className="italic font-normal" style={{ color: "#D4B882" }}>
-                metas.
-              </em>
-            </>
+        {/* Texto centrado en el área superior */}
+        <div className="flex-1 flex flex-col items-center justify-center">
+          {subheading && (
+            <motion.span
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="font-sans text-[11px] uppercase tracking-[0.35em] block mb-4"
+              style={{ color: subheadingColor ?? "rgba(255,255,255,0.5)" }}
+            >
+              {subheading}
+            </motion.span>
           )}
-        </motion.h1>
 
+          {heading && (
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="font-serif font-light leading-[1.08] max-w-3xl"
+              style={{
+                fontFamily: "var(--font-cormorant, Georgia, serif)",
+                fontSize: "clamp(2.2rem, 5vw, 4rem)",
+                color: headingColor ?? "#FFFFFF",
+              }}
+            >
+              {heading}
+            </motion.h1>
+          )}
+        </div>
+
+        {/* Botones anclados al fondo, siempre a la misma distancia */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9 }}
-          className="flex flex-col sm:flex-row items-center gap-5"
+          className="flex flex-col sm:flex-row items-center gap-5 pb-10"
         >
           <Link
             href="/tienda"
-            className="font-sans text-[11px] uppercase tracking-[0.25em] text-white bg-sage-600 hover:bg-sage-500 border border-sage-400 px-9 py-4 transition-all duration-300 shadow-lg hover:shadow-sage-900/30 hover:-translate-y-0.5"
+            className="font-sans text-[11px] uppercase tracking-[0.25em] text-white bg-sage-600 hover:bg-sage-500 border border-sage-400 px-9 py-4 min-w-[240px] flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-sage-900/30 hover:-translate-y-0.5"
           >
             Descubrí nuestras opciones
           </Link>
@@ -100,7 +102,7 @@ export default function Hero() {
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-sans text-[11px] uppercase tracking-[0.2em] text-white bg-white/15 border border-white/70 hover:bg-white/25 hover:border-white flex items-center gap-2 px-7 py-4 transition-all duration-300 backdrop-blur-sm"
+            className="font-sans text-[11px] uppercase tracking-[0.2em] text-white bg-white/15 border border-white/70 hover:bg-white/25 hover:border-white flex items-center justify-center gap-2 px-9 py-4 min-w-[240px] transition-all duration-300 backdrop-blur-sm"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             Pedir por WhatsApp

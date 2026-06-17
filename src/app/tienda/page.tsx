@@ -253,6 +253,7 @@ export default function TiendaPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [bannerImgVisible, setBannerImgVisible] = useState(false);
   const [bannerHeading, setBannerHeading] = useState<string | null>(null);
   const [bannerSubheading, setBannerSubheading] = useState<string | null>(null);
   const [bannerHeadingColor, setBannerHeadingColor] = useState<string | null>(null);
@@ -297,7 +298,7 @@ export default function TiendaPage() {
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
 
       {/* Hero */}
-      <div className="relative overflow-hidden py-20 md:py-28 px-5" style={{ background: "#1E1E1E" }}>
+      <div className="relative overflow-hidden px-5 flex items-center justify-center" style={{ background: bannerUrl ? "#1E1E1E" : "#FFFFFF", minHeight: "320px", paddingTop: "7rem", paddingBottom: "7rem" }}>
         {bannerUrl && (
           <Image
             src={bannerUrl}
@@ -306,32 +307,30 @@ export default function TiendaPage() {
             className="object-cover"
             sizes="100vw"
             priority
+            onLoad={() => setBannerImgVisible(true)}
+            style={{ opacity: bannerImgVisible ? 1 : 0, transition: "opacity 0.6s ease" }}
           />
         )}
         <div className="relative max-w-6xl mx-auto text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            className="font-sans text-xs uppercase tracking-[0.35em] mb-4" style={{ color: "#9A8B6E" }}
-          >
-            Pedí online
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif font-light text-5xl md:text-7xl mb-4"
-            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: bannerHeadingColor ?? "#FFFFFF" }}
-          >
-            {bannerHeading ?? (
-              <>Nuestra{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>tienda</em></>
-            )}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
-            className="font-sans text-sm max-w-md mx-auto"
-            style={{ color: bannerSubheadingColor ?? "rgba(255,255,255,0.4)" }}
-          >
-            {bannerSubheading ?? "Elegí tus viandas, armá tu pedido y empezá a disfrutar."}
-          </motion.p>
+          {bannerHeading && (
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="font-serif font-light text-5xl md:text-7xl mb-4"
+              style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: bannerHeadingColor ?? "#FFFFFF" }}
+            >
+              {bannerHeading}
+            </motion.h1>
+          )}
+          {bannerSubheading && (
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
+              className="font-sans text-sm max-w-md mx-auto"
+              style={{ color: bannerSubheadingColor ?? "rgba(255,255,255,0.4)" }}
+            >
+              {bannerSubheading}
+            </motion.p>
+          )}
         </div>
       </div>
 
