@@ -13,6 +13,8 @@ export default function Hero() {
   const [bgImage, setBgImage] = useState(FALLBACK_IMAGE);
   const [heading, setHeading] = useState<string | null>(null);
   const [subheading, setSubheading] = useState<string | null>(null);
+  const [headingColor, setHeadingColor] = useState<string | null>(null);
+  const [subheadingColor, setSubheadingColor] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/banner?id=home-hero")
@@ -21,6 +23,8 @@ export default function Hero() {
         if (d.active && d.image_url) setBgImage(d.image_url);
         if (d.heading_text) setHeading(d.heading_text);
         if (d.subheading_text) setSubheading(d.subheading_text);
+        if (d.heading_color) setHeadingColor(d.heading_color);
+        if (d.subheading_color) setSubheadingColor(d.subheading_color);
       });
   }, []);
 
@@ -43,9 +47,6 @@ export default function Hero() {
         />
       </div>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/35" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40" />
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5">
@@ -54,7 +55,8 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="font-sans text-white/50 text-[11px] uppercase tracking-[0.35em] block mb-4"
+          className="font-sans text-[11px] uppercase tracking-[0.35em] block mb-4"
+          style={{ color: subheadingColor ?? "rgba(255,255,255,0.5)" }}
         >
           {subheading ?? "Palermo & Villa Crespo · Buenos Aires"}
         </motion.span>
@@ -63,10 +65,11 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif text-white font-light leading-[1.08] mb-6 max-w-3xl"
+          className="font-serif font-light leading-[1.08] mb-6 max-w-3xl"
           style={{
             fontFamily: "var(--font-cormorant, Georgia, serif)",
             fontSize: "clamp(2.2rem, 5vw, 4rem)",
+            color: headingColor ?? "#FFFFFF",
           }}
         >
           {heading ?? (

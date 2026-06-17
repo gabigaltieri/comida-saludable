@@ -255,6 +255,8 @@ export default function TiendaPage() {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [bannerHeading, setBannerHeading] = useState<string | null>(null);
   const [bannerSubheading, setBannerSubheading] = useState<string | null>(null);
+  const [bannerHeadingColor, setBannerHeadingColor] = useState<string | null>(null);
+  const [bannerSubheadingColor, setBannerSubheadingColor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSubcatId, setActiveSubcatId] = useState<string | null>(null);
   const [showOnlyCombos, setShowOnlyCombos] = useState(false);
@@ -285,6 +287,8 @@ export default function TiendaPage() {
       if (banner?.active && banner?.image_url) setBannerUrl(banner.image_url);
       if (banner?.heading_text) setBannerHeading(banner.heading_text);
       if (banner?.subheading_text) setBannerSubheading(banner.subheading_text);
+      if (banner?.heading_color) setBannerHeadingColor(banner.heading_color);
+      if (banner?.subheading_color) setBannerSubheadingColor(banner.subheading_color);
       if (Array.isArray(combosData)) setCombos(combosData);
     }).finally(() => setLoading(false));
   }, []);
@@ -304,11 +308,6 @@ export default function TiendaPage() {
             priority
           />
         )}
-        <div className="absolute inset-0 bg-black/50" />
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{ backgroundImage: "radial-gradient(circle at 70% 50%, #9A8B6E 0%, transparent 60%)" }}
-        />
         <div className="relative max-w-6xl mx-auto text-center">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
@@ -319,8 +318,8 @@ export default function TiendaPage() {
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif font-light text-5xl md:text-7xl text-white mb-4"
-            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}
+            className="font-serif font-light text-5xl md:text-7xl mb-4"
+            style={{ fontFamily: "var(--font-cormorant, Georgia, serif)", color: bannerHeadingColor ?? "#FFFFFF" }}
           >
             {bannerHeading ?? (
               <>Nuestra{" "}<em className="italic font-normal" style={{ color: "#D4B882" }}>tienda</em></>
@@ -328,7 +327,8 @@ export default function TiendaPage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.4 }}
-            className="font-sans text-white/40 text-sm max-w-md mx-auto"
+            className="font-sans text-sm max-w-md mx-auto"
+            style={{ color: bannerSubheadingColor ?? "rgba(255,255,255,0.4)" }}
           >
             {bannerSubheading ?? "Elegí tus viandas, armá tu pedido y empezá a disfrutar."}
           </motion.p>

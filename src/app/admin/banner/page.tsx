@@ -8,7 +8,45 @@ import {
   CheckCircle2, XCircle, Info, Eye, EyeOff,
 } from "lucide-react";
 
-type Banner = { id: string; image_url: string | null; active: boolean; heading_text: string | null; subheading_text: string | null };
+type Banner = { id: string; image_url: string | null; active: boolean; heading_text: string | null; subheading_text: string | null; heading_color: string | null; subheading_color: string | null };
+
+const TEXT_COLORS = [
+  { label: "Blanco", value: "#FFFFFF" },
+  { label: "Crema", value: "#F5EFE0" },
+  { label: "Dorado", value: "#D4B882" },
+  { label: "Sage", value: "#9EB89A" },
+  { label: "Gris", value: "#AAAAAA" },
+  { label: "Negro", value: "#222222" },
+];
+
+function ColorPicker({ value, onChange }: { value: string | null; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      {TEXT_COLORS.map((c) => {
+        const selected = value === c.value;
+        return (
+          <button
+            key={c.value}
+            type="button"
+            title={c.label}
+            onClick={() => onChange(c.value)}
+            className={`w-7 h-7 rounded-full border-2 transition-all ${selected ? "scale-110 border-sage-500 shadow-md" : "border-transparent hover:border-gray-300"}`}
+            style={{ backgroundColor: c.value, outline: selected ? "2px solid white" : "none", outlineOffset: "1px" }}
+          />
+        );
+      })}
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="ml-1 font-sans text-xs text-gray-400 hover:text-red-400 transition-colors"
+        >
+          Limpiar
+        </button>
+      )}
+    </div>
+  );
+}
 
 const SPECS = [
   { label: "Tamaño mínimo", value: "1200 × 400 px" },
@@ -95,6 +133,8 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
           active: banner.active,
           heading_text: banner.heading_text,
           subheading_text: banner.subheading_text,
+          heading_color: banner.heading_color,
+          subheading_color: banner.subheading_color,
         }),
       });
       const data = await res.json();
@@ -209,7 +249,7 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
 
       {/* Texto overlay */}
-      <div className="px-5 pb-5 border-t border-gray-100 pt-5 space-y-4">
+      <div className="px-5 pb-5 border-t border-gray-100 pt-5 space-y-5">
         <p className="font-sans text-xs font-semibold text-gray-400 uppercase tracking-wider">Texto del hero</p>
         <div>
           <label className="block font-sans text-sm font-medium text-gray-600 mb-1.5">Título</label>
@@ -221,6 +261,13 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
             className="w-full font-sans text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sage-300 focus:border-transparent placeholder:text-gray-300"
           />
           <p className="font-sans text-xs text-gray-400 mt-1">Dejá vacío para usar el texto por defecto del sitio.</p>
+          <div className="mt-2">
+            <p className="font-sans text-xs text-gray-400 mb-1">Color del título</p>
+            <ColorPicker
+              value={banner?.heading_color ?? null}
+              onChange={(v) => setBanner((b) => b ? { ...b, heading_color: v || null } : b)}
+            />
+          </div>
         </div>
         <div>
           <label className="block font-sans text-sm font-medium text-gray-600 mb-1.5">Subtítulo</label>
@@ -231,6 +278,13 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
             placeholder="Ej: Palermo & Villa Crespo · Buenos Aires"
             className="w-full font-sans text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sage-300 focus:border-transparent placeholder:text-gray-300"
           />
+          <div className="mt-2">
+            <p className="font-sans text-xs text-gray-400 mb-1">Color del subtítulo</p>
+            <ColorPicker
+              value={banner?.subheading_color ?? null}
+              onChange={(v) => setBanner((b) => b ? { ...b, subheading_color: v || null } : b)}
+            />
+          </div>
         </div>
       </div>
 
