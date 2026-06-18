@@ -298,7 +298,7 @@ export default function TiendaPage() {
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
 
       {/* Hero */}
-      <div className="relative overflow-hidden px-5 flex items-center justify-center min-h-[320px] md:min-h-[600px] py-20 md:py-28" style={{ background: bannerUrl ? "#1E1E1E" : "#FFFFFF" }}>
+      <div className="relative overflow-hidden px-5 flex items-center justify-center h-[calc(55vh_-_40px)] min-h-[360px]" style={{ background: bannerUrl ? "#1E1E1E" : "#EDEAE4" }}>
         {bannerUrl && (
           <Image
             src={bannerUrl}

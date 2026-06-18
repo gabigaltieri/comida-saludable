@@ -22,7 +22,7 @@ export default function StoreNavbar() {
   return (
     <>
       <header className="bg-cream-100/95 backdrop-blur-md border-b border-sage-100 shadow-sm">
-        <nav className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+        <nav className="max-w-6xl mx-auto px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center group">
             <Image
               src="/logo.png"
