@@ -253,6 +253,7 @@ export default function TiendaPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [mobileBannerUrl, setMobileBannerUrl] = useState<string | null>(null);
   const [bannerImgVisible, setBannerImgVisible] = useState(false);
   const [bannerHeading, setBannerHeading] = useState<string | null>(null);
   const [bannerSubheading, setBannerSubheading] = useState<string | null>(null);
@@ -286,6 +287,7 @@ export default function TiendaPage() {
       setProducts(prods);
       if (Array.isArray(cats)) setCategories(cats);
       if (banner?.active && banner?.image_url) setBannerUrl(banner.image_url);
+      if (banner?.active && banner?.mobile_image_url) setMobileBannerUrl(banner.mobile_image_url);
       if (banner?.heading_text) setBannerHeading(banner.heading_text);
       if (banner?.subheading_text) setBannerSubheading(banner.subheading_text);
       if (banner?.heading_color) setBannerHeadingColor(banner.heading_color);
@@ -298,13 +300,27 @@ export default function TiendaPage() {
     <div className="min-h-screen" style={{ background: "#EDEAE4" }}>
 
       {/* Hero */}
-      <div className="relative overflow-hidden px-5 flex items-center justify-center h-[calc(55vh_-_40px)] min-h-[360px]" style={{ background: bannerUrl ? "#1E1E1E" : "#EDEAE4" }}>
+      <div className="relative overflow-hidden px-5 flex items-center justify-center h-[calc(55vh_-_40px)] min-h-[360px]" style={{ background: (bannerUrl || mobileBannerUrl) ? "#1E1E1E" : "#EDEAE4" }}>
+        {/* Desktop image */}
         {bannerUrl && (
           <Image
             src={bannerUrl}
             alt="Banner tienda"
             fill
-            className="object-cover"
+            className="object-cover hidden md:block"
+            sizes="100vw"
+            priority
+            onLoad={() => setBannerImgVisible(true)}
+            style={{ opacity: bannerImgVisible ? 1 : 0, transition: "opacity 0.6s ease" }}
+          />
+        )}
+        {/* Mobile image */}
+        {(mobileBannerUrl || bannerUrl) && (
+          <Image
+            src={mobileBannerUrl ?? bannerUrl!}
+            alt="Banner tienda mobile"
+            fill
+            className="object-cover block md:hidden"
             sizes="100vw"
             priority
             onLoad={() => setBannerImgVisible(true)}

@@ -37,6 +37,7 @@ export async function PATCH(req: NextRequest) {
   if (body.subheading_text !== undefined) payload.subheading_text = body.subheading_text || null;
   if (body.heading_color !== undefined) payload.heading_color = body.heading_color || null;
   if (body.subheading_color !== undefined) payload.subheading_color = body.subheading_color || null;
+  if (body.mobile_image_url !== undefined) payload.mobile_image_url = body.mobile_image_url || null;
 
   const { data, error } = await supabaseAdmin
     .from("banners")

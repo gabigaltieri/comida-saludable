@@ -8,9 +8,9 @@ export async function GET(req: NextRequest) {
 
   const { data } = await supabaseAdmin
     .from("banners")
-    .select("image_url, active, heading_text, subheading_text, heading_color, subheading_color")
+    .select("image_url, mobile_image_url, active, heading_text, subheading_text, heading_color, subheading_color")
     .eq("id", id)
     .single();
 
-  return NextResponse.json(data ?? { image_url: null, active: false, heading_text: null, subheading_text: null, heading_color: null, subheading_color: null });
+  return NextResponse.json(data ?? { image_url: null, mobile_image_url: null, active: false, heading_text: null, subheading_text: null, heading_color: null, subheading_color: null });
 }

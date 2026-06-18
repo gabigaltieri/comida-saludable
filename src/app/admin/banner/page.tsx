@@ -8,7 +8,7 @@ import {
   CheckCircle2, XCircle, Info, Eye, EyeOff,
 } from "lucide-react";
 
-type Banner = { id: string; image_url: string | null; active: boolean; heading_text: string | null; subheading_text: string | null; heading_color: string | null; subheading_color: string | null };
+type Banner = { id: string; image_url: string | null; mobile_image_url: string | null; active: boolean; heading_text: string | null; subheading_text: string | null; heading_color: string | null; subheading_color: string | null };
 
 const TEXT_COLORS = [
   { label: "Blanco", value: "#FFFFFF" },
@@ -56,6 +56,13 @@ const SPECS = [
   { label: "Peso máximo", value: "15 MB" },
 ];
 
+const MOBILE_SPECS = [
+  { label: "Tamaño recomendado", value: "750 × 1200 px" },
+  { label: "Relación de aspecto", value: "9:16 (vertical)" },
+  { label: "Formatos aceptados", value: "JPG, PNG, WebP" },
+  { label: "Peso máximo", value: "10 MB" },
+];
+
 const BANNERS_CONFIG = [
   { id: "home-hero", label: "Banner Home", description: "Imagen de fondo del hero principal (página de inicio)" },
   { id: "tienda-hero", label: "Banner Tienda", description: "Imagen de fondo del hero de /tienda" },
@@ -65,10 +72,13 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
   const [banner, setBanner] = useState<Banner | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [mobileDragOver, setMobileDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const mobileFileRef = useRef<HTMLInputElement>(null);
 
   const showToast = (msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -120,6 +130,46 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
     if (file) uploadFile(file);
   };
 
+  const uploadMobileFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      showToast("Solo se aceptan imágenes (JPG, PNG, WebP)", "err");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast("La imagen supera el límite de 10 MB", "err");
+      return;
+    }
+    setUploadingMobile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setBanner((b) => b ? { ...b, mobile_image_url: data.url } : b);
+      showToast("Imagen mobile cargada — guardá los cambios");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Error al subir imagen", "err");
+    } finally {
+      setUploadingMobile(false);
+    }
+  };
+
+  const handleMobileFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadMobileFile(file);
+    e.target.value = "";
+  };
+
+  const handleMobileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setMobileDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadMobileFile(file);
+  };
+
+  const clearMobileImage = () => setBanner((b) => b ? { ...b, mobile_image_url: null } : b);
+
   const save = async () => {
     if (!banner) return;
     setSaving(true);
@@ -130,6 +180,7 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
         body: JSON.stringify({
           id: config.id,
           image_url: banner.image_url,
+          mobile_image_url: banner.mobile_image_url,
           active: banner.active,
           heading_text: banner.heading_text,
           subheading_text: banner.subheading_text,
@@ -247,6 +298,99 @@ function BannerPanel({ config }: { config: typeof BANNERS_CONFIG[0] }) {
       </div>
 
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
+      <input ref={mobileFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleMobileFile} />
+
+      {/* Banner versión celular */}
+      <div className="px-5 pb-5 border-t border-gray-100 pt-5">
+        <p className="font-sans text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+          Banner versión celular
+        </p>
+
+        {/* Specs mobile */}
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4 flex gap-2">
+          <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-sans text-xs font-semibold text-amber-700 mb-1.5">Especificaciones para celular</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5">
+              {MOBILE_SPECS.map(({ label, value }) => (
+                <div key={label} className="flex gap-1.5 font-sans text-xs">
+                  <span className="text-amber-500 flex-shrink-0">{label}:</span>
+                  <span className="text-amber-700 font-medium">{value}</span>
+                </div>
+              ))}
+            </div>
+            <p className="font-sans text-[11px] text-amber-400 mt-1.5">
+              Si no subís imagen mobile, se usa la imagen de escritorio en celulares también.
+            </p>
+          </div>
+        </div>
+
+        {/* Upload area mobile — portrait */}
+        <div className="flex gap-6 items-start">
+          <div className="flex-shrink-0" style={{ width: 140 }}>
+            {banner?.mobile_image_url ? (
+              <div>
+                <div className="relative rounded-xl overflow-hidden mb-2 shadow-sm" style={{ aspectRatio: "9/16", width: 140 }}>
+                  <Image src={banner.mobile_image_url} alt="Banner mobile" fill className="object-cover" sizes="140px" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-xl">
+                    <button
+                      onClick={() => mobileFileRef.current?.click()}
+                      className="flex items-center gap-1.5 bg-white text-gray-700 font-sans text-xs font-medium px-3 py-1.5 rounded-full shadow"
+                    >
+                      <Upload className="w-3 h-3" />
+                      Cambiar
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    onClick={() => mobileFileRef.current?.click()}
+                    disabled={uploadingMobile}
+                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border-2 border-dashed border-gray-200 font-sans text-xs text-gray-400 hover:border-amber-300 hover:text-amber-500 transition-colors disabled:opacity-50 w-full"
+                  >
+                    {uploadingMobile ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                    {uploadingMobile ? "Subiendo..." : "Cambiar imagen"}
+                  </button>
+                  <button
+                    onClick={clearMobileImage}
+                    className="flex items-center justify-center gap-1 font-sans text-xs text-red-400 hover:text-red-600 transition-colors py-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Quitar imagen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                onDrop={handleMobileDrop}
+                onDragOver={(e) => { e.preventDefault(); setMobileDragOver(true); }}
+                onDragLeave={() => setMobileDragOver(false)}
+                onClick={() => mobileFileRef.current?.click()}
+                className={`flex flex-col items-center justify-center rounded-xl cursor-pointer transition-colors border-2 border-dashed ${
+                  mobileDragOver ? "bg-amber-50 border-amber-300" : "bg-gray-50 border-gray-200 hover:bg-amber-50 hover:border-amber-200"
+                }`}
+                style={{ aspectRatio: "9/16", width: 140 }}
+              >
+                {uploadingMobile ? (
+                  <Loader2 className="w-6 h-6 text-amber-400 animate-spin mb-2" />
+                ) : (
+                  <ImageIcon className={`w-6 h-6 mb-2 ${mobileDragOver ? "text-amber-400" : "text-gray-300"}`} />
+                )}
+                <p className="font-sans text-[11px] text-center text-gray-400 px-2 leading-snug">
+                  {uploadingMobile ? "Subiendo..." : "Arrastrá o hacé click"}
+                </p>
+                <p className="font-sans text-[10px] text-gray-300 text-center px-2 mt-1 leading-snug">9:16 · Máx 10 MB</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 font-sans text-xs text-gray-400 leading-relaxed pt-1 space-y-1.5">
+            <p className="font-medium text-gray-500">¿Cuándo se usa esta imagen?</p>
+            <p>En pantallas de celular (menos de 768px de ancho), se muestra esta imagen en lugar del banner horizontal.</p>
+            <p>Así podés cargar una foto vertical que se vea mejor en móvil sin recortarse.</p>
+          </div>
+        </div>
+      </div>
 
       {/* Texto overlay */}
       <div className="px-5 pb-5 border-t border-gray-100 pt-5 space-y-5">
