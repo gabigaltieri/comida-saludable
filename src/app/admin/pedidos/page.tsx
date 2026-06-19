@@ -24,6 +24,15 @@ const ESTADOS: { value: Estado; label: string; color: string; icon: React.Elemen
 
 const ESTADO_FALLBACK = { label: "Desconocido", color: "bg-gray-100 text-gray-500 border-gray-200", icon: Clock };
 
+const MENSAJES_WA: Record<string, string> = {
+  pendiente_pago: "Tu pedido esta pendiente de pago. Completalo para que podamos procesarlo.",
+  pendiente: "Recibimos tu pedido y esta pendiente de confirmacion. En breve te avisamos.",
+  "en preparación": "Tu pedido esta en preparacion. Pronto estara listo!",
+  pagado: "Confirmamos el pago de tu pedido. Ya lo estamos preparando!",
+  entregado: "Tu pedido fue entregado. Gracias por elegirnos!",
+  cancelado: "Tu pedido fue cancelado. Si tenes alguna consulta escribinos.",
+};
+
 const PAGE_SIZE = 20;
 
 export default function AdminPedidos() {
@@ -299,12 +308,18 @@ export default function AdminPedidos() {
                             </p>
                           )}
 
-                          <a href={`https://wa.me/${pedido.telefono}?text=${encodeURIComponent(`Hola ${pedido.cliente.split(" ")[0]}! Tu pedido ${pedido.order_number} está ${pedido.estado}. 🌿`)}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white font-sans text-sm font-medium py-3 rounded-xl transition-colors shadow-sm">
-                            <MessageCircle className="w-4 h-4" />
-                            Notificar al cliente
-                          </a>
+                          {(() => {
+                            const estadoActivo = estadoLocal[pedido.id] ?? pedido.estado;
+                            const mensaje = `Hola ${pedido.cliente.split(" ")[0]}! ${MENSAJES_WA[estadoActivo] ?? `Tu pedido ${pedido.order_number} fue actualizado.`} Numero de orden: ${pedido.order_number}.`;
+                            return (
+                              <a href={`https://wa.me/${pedido.telefono}?text=${encodeURIComponent(mensaje)}`}
+                                target="_blank" rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white font-sans text-sm font-medium py-3 rounded-xl transition-colors shadow-sm">
+                                <MessageCircle className="w-4 h-4" />
+                                Notificar al cliente
+                              </a>
+                            );
+                          })()}
                         </div>
                       </div>
                     </motion.div>
