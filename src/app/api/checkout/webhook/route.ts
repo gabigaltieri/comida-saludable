@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getMPCredentials } from "@/lib/mpCredentials";
 import crypto from "crypto";
 
-function verifySignature(req: NextRequest, body: string): boolean {
-  const secret = process.env.MP_WEBHOOK_SECRET;
-  if (!secret) return false; // Sin secret configurado, rechazar toda firma
+function verifySignature(req: NextRequest, body: string, secret: string): boolean {
+  if (!secret) return false;
 
   const xSignature = req.headers.get("x-signature");
   const xRequestId = req.headers.get("x-request-id");
@@ -36,8 +36,9 @@ function verifySignature(req: NextRequest, body: string): boolean {
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
+  const { accessToken, webhookSecret } = await getMPCredentials();
 
-  if (!verifySignature(req, rawBody)) {
+  if (!verifySignature(req, rawBody, webhookSecret)) {
     return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
   }
 
@@ -53,12 +54,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  if (!process.env.MP_ACCESS_TOKEN) {
+  if (!accessToken) {
     return NextResponse.json({ received: true });
   }
 
   try {
-    const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+    const client = new MercadoPagoConfig({ accessToken });
     const paymentClient = new Payment(client);
     const payment = await paymentClient.get({ id: notification.data.id });
 

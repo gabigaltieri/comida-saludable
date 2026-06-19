@@ -7,18 +7,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   Clock, Loader2, CheckCircle2, XCircle, MessageCircle,
-  Search, ChevronDown, Package, Truck, Store, Save,
+  Search, ChevronDown, Package, Truck, Store, Save, Trash2,
 } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/data";
 
 type Estado = Order["estado"];
 
 const ESTADOS: { value: Estado; label: string; color: string; icon: React.ElementType }[] = [
+  { value: "pendiente_pago", label: "Pago pendiente", color: "bg-purple-100 text-purple-700 border-purple-200", icon: Clock },
   { value: "pendiente", label: "Pendiente", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
   { value: "en preparación", label: "En preparación", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Loader2 },
+  { value: "pagado", label: "Pagado", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
   { value: "entregado", label: "Entregado", color: "bg-sage-100 text-sage-700 border-sage-200", icon: CheckCircle2 },
   { value: "cancelado", label: "Cancelado", color: "bg-red-100 text-red-500 border-red-200", icon: XCircle },
 ];
+
+const ESTADO_FALLBACK = { label: "Desconocido", color: "bg-gray-100 text-gray-500 border-gray-200", icon: Clock };
 
 const PAGE_SIZE = 20;
 
@@ -33,6 +37,8 @@ export default function AdminPedidos() {
   const [estadoLocal, setEstadoLocal] = useState<Record<number, Estado>>({});
   const [saving, setSaving] = useState<number | null>(null);
   const [savedOk, setSavedOk] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     getOrders()
@@ -63,6 +69,20 @@ export default function AdminPedidos() {
     setSaving(null);
     setSavedOk(id);
     setTimeout(() => setSavedOk(null), 2000);
+  };
+
+  const eliminarPedido = async (id: number) => {
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPedidos((prev) => prev.filter((p) => p.id !== id));
+        if (expanded === String(id)) setExpanded(null);
+      }
+    } finally {
+      setDeleting(null);
+      setConfirmDelete(null);
+    }
   };
 
   const countByEstado = (e: Estado) => pedidos.filter((p) => p.estado === e).length;
@@ -123,7 +143,7 @@ export default function AdminPedidos() {
         )}
         <AnimatePresence>
           {paginated.map((pedido) => {
-            const estadoCfg = ESTADOS.find((e) => e.value === pedido.estado)!;
+            const estadoCfg = ESTADOS.find((e) => e.value === pedido.estado) ?? ESTADO_FALLBACK;
             const isOpen = expanded === String(pedido.id);
             const fecha = new Date(pedido.created_at).toLocaleString("es-AR", {
               day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
@@ -132,29 +152,60 @@ export default function AdminPedidos() {
             return (
               <motion.div key={pedido.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <button onClick={() => setExpanded(isOpen ? null : String(pedido.id))}
-                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50/50 transition-colors text-left">
-                  <div className="flex-shrink-0">
-                    <p className="font-sans text-sm font-bold text-gray-700">{pedido.order_number}</p>
-                    <p className="font-sans text-xs text-gray-400">{fecha}</p>
+                <div className="flex items-center">
+                  <button onClick={() => setExpanded(isOpen ? null : String(pedido.id))}
+                    className="flex-1 flex items-center gap-4 px-5 py-4 hover:bg-gray-50/50 transition-colors text-left">
+                    <div className="flex-shrink-0">
+                      <p className="font-sans text-sm font-bold text-gray-700">{pedido.order_number}</p>
+                      <p className="font-sans text-xs text-gray-400">{fecha}</p>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans text-sm font-semibold text-gray-700 truncate">{pedido.cliente}</p>
+                      <p className="font-sans text-xs text-gray-400 truncate">
+                        {pedido.productos.map((p) => `${p.cantidad}x ${p.nombre}`).join(", ")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="font-sans text-sm font-semibold text-gray-700 hidden sm:block">
+                        {formatPrice(pedido.total)}
+                      </span>
+                      <span className={cn("hidden sm:inline-flex items-center gap-1.5 font-sans text-xs font-medium px-2.5 py-1 rounded-full border", estadoCfg.color)}>
+                        <estadoCfg.icon className="w-3 h-3" />
+                        {estadoCfg.label}
+                      </span>
+                      <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isOpen && "rotate-180")} />
+                    </div>
+                  </button>
+
+                  {/* Botón eliminar */}
+                  <div className="pr-4 flex-shrink-0">
+                    {confirmDelete === pedido.id ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => eliminarPedido(pedido.id)}
+                          disabled={deleting === pedido.id}
+                          className="font-sans text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60"
+                        >
+                          {deleting === pedido.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirmar"}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="font-sans text-xs text-gray-400 hover:text-gray-600 px-2 py-1.5 rounded-lg transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConfirmDelete(pedido.id); }}
+                        className="p-2 text-gray-300 hover:text-red-400 transition-colors rounded-lg hover:bg-red-50"
+                        title="Eliminar pedido"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-sm font-semibold text-gray-700 truncate">{pedido.cliente}</p>
-                    <p className="font-sans text-xs text-gray-400 truncate">
-                      {pedido.productos.map((p) => `${p.cantidad}x ${p.nombre}`).join(", ")}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="font-sans text-sm font-semibold text-gray-700 hidden sm:block">
-                      {formatPrice(pedido.total)}
-                    </span>
-                    <span className={cn("hidden sm:inline-flex items-center gap-1.5 font-sans text-xs font-medium px-2.5 py-1 rounded-full border", estadoCfg.color)}>
-                      <estadoCfg.icon className="w-3 h-3" />
-                      {estadoCfg.label}
-                    </span>
-                    <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isOpen && "rotate-180")} />
-                  </div>
-                </button>
+                </div>
 
                 <AnimatePresence>
                   {isOpen && (

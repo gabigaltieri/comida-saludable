@@ -41,3 +41,21 @@ export async function PATCH(
 
   return NextResponse.json(data);
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  const id = Number(params.id);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin.from("orders").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}

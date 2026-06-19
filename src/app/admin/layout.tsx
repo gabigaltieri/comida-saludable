@@ -19,6 +19,7 @@ import {
   ImageIcon,
   Megaphone,
   Snowflake,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/admin/viandas-combos", label: "Combos Viandas", icon: Snowflake },
   { href: "/admin/banner", label: "Banner", icon: ImageIcon },
   { href: "/admin/anuncio", label: "Anuncio", icon: Megaphone },
+  { href: "/admin/credenciales", label: "Credenciales MP", icon: KeyRound },
 ];
 
 function Sidebar({ onLogout, mobile, onClose }: { onLogout: () => void; mobile?: boolean; onClose?: () => void }) {

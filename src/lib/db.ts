@@ -69,7 +69,7 @@ export interface Order {
   email?: string;
   productos: { nombre: string; cantidad: number; precio: number }[];
   total: number;
-  estado: "pendiente" | "en preparación" | "entregado" | "cancelado";
+  estado: "pendiente_pago" | "pendiente" | "en preparación" | "pagado" | "entregado" | "cancelado";
   entrega: "envio" | "retiro";
   direccion?: string;
   pago: string;

@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit } from "@/lib/rateLimit";
+import { getMPCredentials } from "@/lib/mpCredentials";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  if (!process.env.MP_ACCESS_TOKEN) {
+  const { accessToken } = await getMPCredentials();
+  if (!accessToken) {
     return NextResponse.json(
       { error: "MercadoPago no está configurado todavía." },
       { status: 503 }
@@ -57,7 +61,7 @@ export async function POST(req: NextRequest) {
   const order_number = data.order_number as string;
 
   // 2. Crear preferencia en MercadoPago
-  const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+  const client = new MercadoPagoConfig({ accessToken });
   const preference = new Preference(client);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://262cosasricas.com.ar";
@@ -65,12 +69,14 @@ export async function POST(req: NextRequest) {
   const mpItems = (productos as OrderItem[]).map((p) => ({
     id: p.nombre,
     title: p.nombre,
-    quantity: p.cantidad,
-    unit_price: p.precio,
+    quantity: Number(p.cantidad),
+    unit_price: Number(p.precio),
     currency_id: "ARS",
   }));
 
   try {
+    const isLocalhost = baseUrl.includes("localhost");
+
     const result = await preference.create({
       body: {
         external_reference: order_number,
@@ -84,8 +90,8 @@ export async function POST(req: NextRequest) {
           failure: `${baseUrl}/checkout/failure`,
           pending: `${baseUrl}/checkout/success`,
         },
-        auto_return: "approved",
-        notification_url: `${baseUrl}/api/checkout/webhook`,
+        ...(isLocalhost ? {} : { auto_return: "approved" }),
+        ...(!isLocalhost ? { notification_url: `${baseUrl}/api/checkout/webhook` } : {}),
         statement_descriptor: "262 Cosas Ricas",
       },
     });
@@ -97,7 +103,7 @@ export async function POST(req: NextRequest) {
   } catch (mpError) {
     console.error("Error al crear preferencia MP:", mpError);
     return NextResponse.json(
-      { error: "Error al conectar con MercadoPago" },
+      { error: "Error al conectar con MercadoPago. Intentá con otro método de pago." },
       { status: 500 }
     );
   }
