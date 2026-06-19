@@ -7,13 +7,13 @@ import { ArrowRight } from "lucide-react";
 const CARDS = [
   {
     label: "Viandas Congeladas",
-    href: "#viandas-congeladas",
+    href: "#menu",
     image: "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80",
     emoji: "❄️",
   },
   {
     label: "Viandas Diarias",
-    href: "#viandas-diarias",
+    href: "/tienda/viandas/viandas-diarias",
     image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
     emoji: "🥗",
   },
