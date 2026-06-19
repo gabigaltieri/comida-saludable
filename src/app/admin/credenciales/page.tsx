@@ -296,12 +296,12 @@ export default function CredencialesPage() {
             )
           </li>
           <li>
-            En <span className="font-medium text-sage-700">"Credenciales"</span>{" "}
+            En <span className="font-medium text-sage-700">&ldquo;Credenciales&rdquo;</span>{" "}
             copiá el <span className="font-medium text-sage-700">Access Token</span>{" "}
             y la <span className="font-medium text-sage-700">Public Key</span>
           </li>
           <li>
-            En <span className="font-medium text-sage-700">"Webhooks"</span> configurá
+            En <span className="font-medium text-sage-700">&ldquo;Webhooks&rdquo;</span> configurá
             la URL:
             <br />
             <code className="text-xs bg-white border border-sage-200 rounded px-2 py-1 mt-1.5 inline-block text-sage-600 break-all">
