@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://262cosasricas.com.ar";
+const SITE_URL = "https://262cosasricas.com.ar";
 
 export async function POST(req: NextRequest) {
   const { email, password, nombre, telefono } = await req.json();
