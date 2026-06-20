@@ -94,7 +94,10 @@ export default function AuthModal() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { nombre, telefono } },
+      options: {
+        data: { nombre, telefono },
+        emailRedirectTo: `${window.location.origin}/`,
+      },
     });
     setLoading(false);
     if (error) {
