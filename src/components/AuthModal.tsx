@@ -91,30 +91,16 @@ export default function AuthModal() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { nombre, telefono },
-        emailRedirectTo: `${window.location.origin}/`,
-      },
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, nombre, telefono }),
     });
+    const result = await res.json();
     setLoading(false);
-    if (error) {
-      if (error.message.includes("already registered")) {
-        setError("Este email ya tiene una cuenta. Iniciá sesión.");
-      } else {
-        setError(error.message);
-      }
+    if (!res.ok) {
+      setError(result.error ?? "Error al crear la cuenta.");
       return;
-    }
-    if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        nombre,
-        telefono,
-        updated_at: new Date().toISOString(),
-      });
     }
     setRegistered(true);
   };
