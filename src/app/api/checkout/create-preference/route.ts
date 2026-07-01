@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   const client = new MercadoPagoConfig({ accessToken });
   const preference = new Preference(client);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://262cosasricas.com.ar";
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://262cosasricas.com.ar").trim().replace(/\/$/, "");
 
   const mpItems = (productos as OrderItem[]).map((p) => ({
     id: p.nombre,

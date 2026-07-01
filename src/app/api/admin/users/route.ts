@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(req: Request) {
-  const deny = await requireAdmin(req as any);
+  const deny = await requireAdmin();
   if (deny) return deny;
 
   const { data: authData, error } = await supabaseAdmin.auth.admin.listUsers({
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const deny = await requireAdmin(req as any);
+  const deny = await requireAdmin();
   if (deny) return deny;
 
   const { id } = await req.json();
