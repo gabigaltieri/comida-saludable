@@ -78,9 +78,9 @@ export default function AdminCombosPage() {
   const toggleProduct = (id: string) => {
     setDraft((d) => {
       if (d.product_ids.includes(id)) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [id]: _removed, ...restQty } = d.product_quantities;
-        return { ...d, product_ids: d.product_ids.filter((p) => p !== id), product_quantities: restQty };
+        const newQty = { ...d.product_quantities };
+        delete newQty[id];
+        return { ...d, product_ids: d.product_ids.filter((p) => p !== id), product_quantities: newQty };
       }
       return { ...d, product_ids: [...d.product_ids, id], product_quantities: { ...d.product_quantities, [id]: 1 } };
     });
