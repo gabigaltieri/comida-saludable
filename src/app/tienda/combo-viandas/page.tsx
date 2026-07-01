@@ -134,8 +134,10 @@ function ComboViandasContent() {
 
     // product_ids con repetición: un ID por unidad (necesario para validación en checkout)
     const product_ids: string[] = [];
+    const product_quantities: Record<string, number> = {};
     selectedItems.forEach(({ product, qty }) => {
       for (let i = 0; i < qty; i++) product_ids.push(product.id);
+      product_quantities[product.id] = qty;
     });
 
     const productList = selectedItems
@@ -150,6 +152,7 @@ function ComboViandasContent() {
       image: selectedItems[0]?.product.image ?? "",
       imageAlt: `Combo de ${targetSize} viandas congeladas`,
       product_ids,
+      product_quantities,
       available: true,
     };
 

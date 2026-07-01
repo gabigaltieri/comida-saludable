@@ -1,15 +1,32 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, Minus, ShoppingBag, MessageCircle, Package, ChevronRight, Gift, Pencil } from "lucide-react";
 import { useCart, formatPrice } from "@/lib/cart";
+import { Product } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const isAdminCombo = (id: string) =>
+  !id.startsWith("custom-") &&
+  !id.startsWith("vc10-") &&
+  !id.startsWith("vc20-") &&
+  !id.startsWith("ct");
+
 export default function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, removeItem, updateQuantity, comboItems, removeCombo, updateComboQuantity, total, itemCount, clearCart, sendToWhatsApp } = useCart();
   const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (!comboItems.some(i => isAdminCombo(i.combo.id))) return;
+    fetch("/api/products")
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setProducts(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [comboItems]);
 
   const handleCheckout = () => {
     sendToWhatsApp();
@@ -224,11 +241,32 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                             {item.combo.name}
                           </p>
                           <p className="font-sans text-sage-500 text-xs mt-0.5">{formatPrice(item.combo.price)}</p>
-                          {item.combo.description && (
+
+                          {/* Detalle de productos para combos del admin */}
+                          {isAdminCombo(item.combo.id) && item.combo.product_ids.length > 0 ? (
+                            <div className="mt-1.5 flex flex-col gap-0.5">
+                              {Array.from(new Set(item.combo.product_ids)).map(pid => {
+                                const product = products.find(p => p.id === pid);
+                                const qty = (item.combo.product_quantities as Record<string, number>)?.[pid]
+                                  ?? item.combo.product_ids.filter(id => id === pid).length;
+                                return (
+                                  <div key={pid} className="flex items-center gap-1.5">
+                                    <span className="font-sans text-[10px] font-semibold text-amber-600 w-5 text-right flex-shrink-0">
+                                      {qty}×
+                                    </span>
+                                    <span className="font-sans text-[10px] text-sage-500 truncate">
+                                      {product ? product.name : pid}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : item.combo.description ? (
                             <p className="font-sans text-[10px] text-sage-400 mt-0.5 leading-relaxed line-clamp-2">
                               {item.combo.description}
                             </p>
-                          )}
+                          ) : null}
+
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-2">
                               <button onClick={() => updateComboQuantity(item.combo.id, item.quantity - 1)} className="w-7 h-7 rounded-full bg-amber-200 hover:bg-amber-300 text-amber-700 flex items-center justify-center transition-colors">

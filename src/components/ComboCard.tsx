@@ -22,7 +22,7 @@ export default function ComboCard({
   const quantity = comboItem?.quantity ?? 0;
 
   const includedProducts = products.filter((p) => combo.product_ids.includes(p.id));
-  const originalPrice = includedProducts.reduce((sum, p) => sum + p.price, 0);
+  const originalPrice = includedProducts.reduce((sum, p) => sum + p.price * (combo.product_quantities?.[p.id] ?? 1), 0);
   const savings = originalPrice > combo.price ? originalPrice - combo.price : 0;
 
   const handleAdd = () => {
@@ -80,14 +80,17 @@ export default function ComboCard({
         {/* Included products */}
         {includedProducts.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {includedProducts.map((p) => (
-              <span
-                key={p.id}
-                className="font-sans text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium"
-              >
-                {p.name}
-              </span>
-            ))}
+            {includedProducts.map((p) => {
+              const qty = combo.product_quantities?.[p.id] ?? 1;
+              return (
+                <span
+                  key={p.id}
+                  className="font-sans text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium"
+                >
+                  {qty > 1 ? `${qty}× ` : ""}{p.name}
+                </span>
+              );
+            })}
           </div>
         )}
 

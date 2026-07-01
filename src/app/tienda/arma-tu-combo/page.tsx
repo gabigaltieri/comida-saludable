@@ -92,6 +92,9 @@ function ArmatuComboContent() {
       .map(({ product, qty }) => (qty > 1 ? `${product.name} ×${qty}` : product.name))
       .join(", ");
 
+    const product_quantities: Record<string, number> = {};
+    selectedItems.forEach(({ product, qty }) => { product_quantities[product.id] = qty; });
+
     const newCombo = {
       id: comboId,
       name: "Tu combo personalizado",
@@ -100,6 +103,7 @@ function ArmatuComboContent() {
       image: selectedItems[0]?.product.image ?? "",
       imageAlt: "Combo personalizado",
       product_ids: selectedItems.map(({ product }) => product.id),
+      product_quantities,
       available: true,
     };
 

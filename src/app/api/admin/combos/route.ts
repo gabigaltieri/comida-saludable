@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   if (authError) return authError;
 
   const body = await req.json();
-  const { name, description, price, image, imageAlt, product_ids, available } = body;
+  const { name, description, price, image, imageAlt, product_ids, product_quantities, available } = body;
 
   if (!name || !price) {
     return NextResponse.json({ error: "Nombre y precio son requeridos" }, { status: 400 });
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       image: image ?? "",
       image_alt: imageAlt ?? "",
       product_ids: product_ids ?? [],
+      product_quantities: product_quantities ?? {},
       available: available ?? true,
     })
     .select()

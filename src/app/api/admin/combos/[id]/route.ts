@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (authError) return authError;
 
   const body = await req.json();
-  const { name, description, price, image, imageAlt, product_ids, available, sort_order } = body;
+  const { name, description, price, image, imageAlt, product_ids, product_quantities, available, sort_order } = body;
 
   const update: Record<string, unknown> = {};
   if (name !== undefined) update.name = name;
@@ -18,6 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (image !== undefined) update.image = image;
   if (imageAlt !== undefined) update.image_alt = imageAlt;
   if (product_ids !== undefined) update.product_ids = product_ids;
+  if (product_quantities !== undefined) update.product_quantities = product_quantities;
   if (available !== undefined) update.available = available;
   if (sort_order !== undefined) update.sort_order = sort_order;
 

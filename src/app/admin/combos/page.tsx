@@ -21,6 +21,7 @@ const EMPTY_DRAFT: ComboDraft = {
   image: "",
   imageAlt: "",
   product_ids: [],
+  product_quantities: {},
   available: true,
 };
 
@@ -62,6 +63,7 @@ export default function AdminCombosPage() {
       image: combo.image,
       imageAlt: combo.imageAlt,
       product_ids: combo.product_ids,
+      product_quantities: combo.product_quantities ?? {},
       available: combo.available,
     });
     setModalOpen(true);
@@ -74,12 +76,19 @@ export default function AdminCombosPage() {
   };
 
   const toggleProduct = (id: string) => {
-    setDraft((d) => ({
-      ...d,
-      product_ids: d.product_ids.includes(id)
-        ? d.product_ids.filter((p) => p !== id)
-        : [...d.product_ids, id],
-    }));
+    setDraft((d) => {
+      if (d.product_ids.includes(id)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [id]: _removed, ...restQty } = d.product_quantities;
+        return { ...d, product_ids: d.product_ids.filter((p) => p !== id), product_quantities: restQty };
+      }
+      return { ...d, product_ids: [...d.product_ids, id], product_quantities: { ...d.product_quantities, [id]: 1 } };
+    });
+  };
+
+  const setProductQty = (id: string, qty: number) => {
+    if (qty < 1) return;
+    setDraft((d) => ({ ...d, product_quantities: { ...d.product_quantities, [id]: qty } }));
   };
 
   const handleUploadImage = async (file: File) => {
@@ -151,7 +160,7 @@ export default function AdminCombosPage() {
   const includedProducts = (combo: Combo) => products.filter((p) => combo.product_ids.includes(p.id));
 
   const originalPrice = (combo: Combo) =>
-    includedProducts(combo).reduce((sum, p) => sum + p.price, 0);
+    includedProducts(combo).reduce((sum, p) => sum + p.price * (combo.product_quantities[p.id] ?? 1), 0);
 
   if (loading) {
     return (
@@ -269,11 +278,14 @@ export default function AdminCombosPage() {
 
                     {included.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {included.map((p) => (
-                          <span key={p.id} className="font-sans text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
-                            {p.name}
-                          </span>
-                        ))}
+                        {included.map((p) => {
+                          const qty = combo.product_quantities[p.id] ?? 1;
+                          return (
+                            <span key={p.id} className="font-sans text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                              {qty > 1 ? `${qty}× ` : ""}{p.name}
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -419,40 +431,73 @@ export default function AdminCombosPage() {
                       {draft.product_ids.length > 0 && (
                         <span className="ml-2 normal-case text-sage-400">
                           ({draft.product_ids.length} seleccionados — precio individual: {formatPrice(
-                            products.filter((p) => draft.product_ids.includes(p.id)).reduce((s, p) => s + p.price, 0)
+                            products.filter((p) => draft.product_ids.includes(p.id))
+                              .reduce((s, p) => s + p.price * (draft.product_quantities[p.id] ?? 1), 0)
                           )})
                         </span>
                       )}
                     </label>
-                    <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto border border-sage-100 rounded-xl p-2">
-                      {products.map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => toggleProduct(p.id)}
-                          className={cn(
-                            "flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                            draft.product_ids.includes(p.id)
-                              ? "bg-amber-50 border border-amber-200"
-                              : "hover:bg-gray-50 border border-transparent"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-                            draft.product_ids.includes(p.id) ? "bg-amber-500 border-amber-500" : "border-gray-300"
-                          )}>
-                            {draft.product_ids.includes(p.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
+                    <div className="flex flex-col gap-1.5 max-h-56 overflow-y-auto border border-sage-100 rounded-xl p-2">
+                      {products.map((p) => {
+                        const selected = draft.product_ids.includes(p.id);
+                        const qty = draft.product_quantities[p.id] ?? 1;
+                        return (
+                          <div
+                            key={p.id}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors",
+                              selected ? "bg-amber-50 border border-amber-200" : "border border-transparent hover:bg-gray-50"
+                            )}
+                          >
+                            {/* Checkbox + nombre */}
+                            <button
+                              type="button"
+                              onClick={() => toggleProduct(p.id)}
+                              className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                            >
+                              <div className={cn(
+                                "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                                selected ? "bg-amber-500 border-amber-500" : "border-gray-300"
+                              )}>
+                                {selected && <div className="w-2 h-2 bg-white rounded-sm" />}
+                              </div>
+                              <span className="font-sans text-sm text-sage-700 truncate">{p.name}</span>
+                            </button>
+
+                            {/* Cantidad o precio */}
+                            {selected ? (
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setProductQty(p.id, qty - 1)}
+                                  disabled={qty <= 1}
+                                  className="w-6 h-6 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold text-sm flex items-center justify-center disabled:opacity-40 transition-colors"
+                                >
+                                  −
+                                </button>
+                                <span className="font-sans text-sm font-semibold text-sage-700 w-5 text-center">{qty}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setProductQty(p.id, qty + 1)}
+                                  className="w-6 h-6 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold text-sm flex items-center justify-center transition-colors"
+                                >
+                                  +
+                                </button>
+                                <span className="font-sans text-xs text-sage-400 ml-1 w-16 text-right">{formatPrice(p.price * qty)}</span>
+                              </div>
+                            ) : (
+                              <span className="font-sans text-xs text-sage-400 flex-shrink-0">{formatPrice(p.price)}</span>
+                            )}
                           </div>
-                          <span className="font-sans text-sm text-sage-700 flex-1 truncate">{p.name}</span>
-                          <span className="font-sans text-xs text-sage-400 flex-shrink-0">{formatPrice(p.price)}</span>
-                        </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
                   {/* Savings preview */}
                   {draft.product_ids.length > 0 && draft.price > 0 && (() => {
-                    const orig = products.filter((p) => draft.product_ids.includes(p.id)).reduce((s, p) => s + p.price, 0);
+                    const orig = products.filter((p) => draft.product_ids.includes(p.id))
+                      .reduce((s, p) => s + p.price * (draft.product_quantities[p.id] ?? 1), 0);
                     const sav = orig - draft.price;
                     return sav > 0 ? (
                       <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">

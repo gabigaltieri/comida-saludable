@@ -106,6 +106,7 @@ function toCombo(row: Record<string, unknown>): Combo {
     image: row.image as string,
     imageAlt: (row.image_alt as string) ?? "",
     product_ids: (row.product_ids as string[]) ?? [],
+    product_quantities: (row.product_quantities as Record<string, number>) ?? {},
     available: row.available as boolean,
     sort_order: row.sort_order as number | undefined,
   };

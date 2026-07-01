@@ -116,8 +116,10 @@ function ComboTartasContent() {
     if (!isComplete) return;
     const comboId = editId ?? `ct${targetSize}-${Date.now()}`;
     const product_ids: string[] = [];
+    const product_quantities: Record<string, number> = {};
     selectedItems.forEach(({ product, qty }) => {
       for (let i = 0; i < qty; i++) product_ids.push(product.id);
+      product_quantities[product.id] = qty;
     });
     const productList = selectedItems
       .map(({ product, qty }) => (qty > 1 ? `${product.name} ×${qty}` : product.name))
@@ -131,6 +133,7 @@ function ComboTartasContent() {
       image: selectedItems[0]?.product.image ?? "",
       imageAlt: `Combo de ${targetSize} tartas`,
       product_ids,
+      product_quantities,
       available: true,
     };
 

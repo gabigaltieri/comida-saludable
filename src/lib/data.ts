@@ -27,6 +27,7 @@ export interface Combo {
   image: string;
   imageAlt: string;
   product_ids: string[];
+  product_quantities: Record<string, number>;
   available: boolean;
   sort_order?: number;
 }
