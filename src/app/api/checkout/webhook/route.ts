@@ -86,28 +86,6 @@ async function notifyAdmin(order: OrderRow, paymentId: string | null) {
     }
   }
 
-  // ── WhatsApp (CallMeBot) ──────────────────────────────────────────────────
-  const callmebotKey = process.env.CALLMEBOT_API_KEY;
-  const adminPhone = process.env.ADMIN_WHATSAPP || "5491138567142";
-
-  if (callmebotKey) {
-    try {
-      const msg = [
-        `✅ *Nuevo pedido pagado — ${order.order_number}*`,
-        `👤 ${order.cliente} | 📞 ${order.telefono}`,
-        `📦 ${entregaLabel}${order.direccion ? ": " + order.direccion : ""}`,
-        ``,
-        productosList,
-        ``,
-        `💰 *Total: ${formatPrice(order.total)}*`,
-      ].join("\n");
-
-      const url = `https://api.callmebot.com/whatsapp.php?phone=${adminPhone}&text=${encodeURIComponent(msg)}&apikey=${callmebotKey}`;
-      await fetch(url);
-    } catch (err) {
-      console.error("Error enviando WhatsApp al admin:", err);
-    }
-  }
 }
 
 export async function POST(req: NextRequest) {
