@@ -34,6 +34,11 @@ const MENSAJES_WA: Record<string, string> = {
 };
 
 const PAGE_SIZE = 20;
+const RESUMEN_MAX_CHARS = 70;
+
+function truncateResumen(texto: string): string {
+  return texto.length > RESUMEN_MAX_CHARS ? `${texto.slice(0, RESUMEN_MAX_CHARS).trimEnd()}…` : texto;
+}
 
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Order[]>([]);
@@ -170,8 +175,8 @@ export default function AdminPedidos() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-sm font-semibold text-gray-700 truncate">{pedido.cliente}</p>
-                      <p className="font-sans text-xs text-gray-400 truncate">
-                        {pedido.productos.map((p) => `${p.cantidad}x ${p.nombre}`).join(", ")}
+                      <p className="font-sans text-xs text-gray-400 truncate max-w-[220px] sm:max-w-xs md:max-w-sm">
+                        {truncateResumen(pedido.productos.map((p) => `${p.cantidad}x ${p.nombre}`).join(", "))}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
@@ -225,9 +230,16 @@ export default function AdminPedidos() {
                           <p className="font-sans text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Productos</p>
                           <div className="flex flex-col gap-2 mb-5">
                             {pedido.productos.map((p) => (
-                              <div key={p.nombre} className="flex justify-between items-center text-sm">
-                                <span className="font-sans text-gray-600">{p.cantidad}× {p.nombre}</span>
-                                <span className="font-sans font-medium text-gray-700">{formatPrice(p.precio * p.cantidad)}</span>
+                              <div key={p.nombre} className="text-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-sans text-gray-600">{p.cantidad}× {p.nombre}</span>
+                                  <span className="font-sans font-medium text-gray-700">{formatPrice(p.precio * p.cantidad)}</span>
+                                </div>
+                                {p.descripcion && (
+                                  <p className="font-sans text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 mt-1">
+                                    🧾 {p.descripcion}
+                                  </p>
+                                )}
                               </div>
                             ))}
                             <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100 mt-1">

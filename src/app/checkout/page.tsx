@@ -154,6 +154,7 @@ function CheckoutContent() {
           nombre: `🎁 ${i.combo.name} (combo)`,
           cantidad: i.quantity,
           precio: i.combo.price,
+          descripcion: i.combo.description || undefined,
         })),
       ];
 
@@ -211,6 +212,7 @@ function CheckoutContent() {
               nombre: `🎁 ${i.combo.name} (combo)`,
               cantidad: i.quantity,
               precio: i.combo.price,
+              descripcion: i.combo.description || undefined,
             })),
           ],
           total: grandTotal,

@@ -67,7 +67,7 @@ export interface Order {
   cliente: string;
   telefono: string;
   email?: string;
-  productos: { nombre: string; cantidad: number; precio: number }[];
+  productos: { nombre: string; cantidad: number; precio: number; descripcion?: string }[];
   total: number;
   estado: "pendiente_pago" | "pendiente" | "en preparación" | "pagado" | "entregado" | "cancelado";
   entrega: "envio" | "retiro";

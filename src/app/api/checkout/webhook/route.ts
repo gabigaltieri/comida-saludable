@@ -39,7 +39,7 @@ type OrderRow = {
   cliente: string;
   telefono: string;
   email: string | null;
-  productos: { nombre: string; cantidad: number; precio: number }[];
+  productos: { nombre: string; cantidad: number; precio: number; descripcion?: string }[];
   total: number;
   entrega: string;
   direccion: string | null;
@@ -48,7 +48,10 @@ type OrderRow = {
 
 async function notifyAdmin(order: OrderRow, paymentId: string | null) {
   const productosList = order.productos
-    .map((p) => `• ${p.cantidad}× ${p.nombre} — ${formatPrice(p.precio * p.cantidad)}`)
+    .map((p) => {
+      const linea = `• ${p.cantidad}× ${p.nombre} — ${formatPrice(p.precio * p.cantidad)}`;
+      return p.descripcion ? `${linea}\n   ${p.descripcion}` : linea;
+    })
     .join("\n");
 
   const entregaLabel = order.entrega === "envio" ? "Envío a domicilio" : "Retiro en local";
