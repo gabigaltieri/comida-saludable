@@ -33,6 +33,7 @@ export interface Combo {
 }
 
 export const WHATSAPP_NUMBER = "5491138567142";
+export const SHIPPING_COST = 10000;
 export const INSTAGRAM_HANDLE = "@262.cosasricas";
 export const ADDRESS = "Tte. Gral. Eustoquio Frías 262, CABA";
 export const MAPS_LINK = "https://maps.app.goo.gl/cu11C5LPSFpRDtvF8";

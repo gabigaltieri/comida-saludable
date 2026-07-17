@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart, formatPrice } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
-import { WHATSAPP_NUMBER } from "@/lib/data";
+import { WHATSAPP_NUMBER, SHIPPING_COST } from "@/lib/data";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -53,7 +53,6 @@ function CheckoutContent() {
   const { user, profile, isEmailConfirmed, openAuthModal, saveProfile } = useAuth();
 
   const [delivery, setDelivery] = useState<Delivery>("envio");
-  const SHIPPING_COST = 10000;
   const grandTotal = total + (delivery === "envio" ? SHIPPING_COST : 0);
   const [payment, setPayment] = useState<Payment>("transferencia");
   const [submitted, setSubmitted] = useState(false);
