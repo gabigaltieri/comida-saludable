@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/requireAdmin";
 
@@ -23,17 +24,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "La imagen no puede superar 15 MB." }, { status: 400 });
   }
 
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
   const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  let buffer = Buffer.from(arrayBuffer);
+  let contentType = file.type;
+  let ext = file.name.split(".").pop() ?? "jpg";
+
+  // GIF se sube tal cual para no romper la animación; el resto se recomprime a WebP
+  if (file.type !== "image/gif") {
+    buffer = await sharp(buffer)
+      .rotate()
+      .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    contentType = "image/webp";
+    ext = "webp";
+  }
+
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   const { error } = await supabaseAdmin.storage
     .from("product-images")
     .upload(filename, buffer, {
-      contentType: file.type,
+      contentType,
       upsert: false,
+      cacheControl: "31536000",
     });
 
   if (error) {
