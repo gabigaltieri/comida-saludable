@@ -9,6 +9,7 @@ import {
   TrendingUp,
   ShoppingBag,
   Package,
+  PackageCheck,
   Users,
   Clock,
   CheckCircle2,
@@ -41,15 +42,18 @@ interface UltimoPedido {
   telefono: string;
   productos: { nombre: string; cantidad: number; precio: number }[];
   total: number;
-  estado: "pendiente" | "en preparación" | "entregado" | "cancelado";
+  estado: "pendiente_pago" | "pendiente" | "en preparación" | "pagado" | "pendiente_envio" | "entregado" | "cancelado";
   created_at: string;
 }
 
 // ── Configuración visual de estados ────────────────────────
 
 const ESTADO_CONFIG = {
+  pendiente_pago: { label: "Pago pendiente", color: "bg-purple-100 text-purple-700", icon: Clock },
   pendiente: { label: "Pendiente", color: "bg-amber-100 text-amber-700", icon: Clock },
   "en preparación": { label: "En preparación", color: "bg-blue-100 text-blue-700", icon: Loader2 },
+  pagado: { label: "Pagado", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
+  pendiente_envio: { label: "Pendiente de envío", color: "bg-indigo-100 text-indigo-700", icon: PackageCheck },
   entregado: { label: "Entregado", color: "bg-sage-100 text-sage-700", icon: CheckCircle2 },
   cancelado: { label: "Cancelado", color: "bg-red-100 text-red-500", icon: XCircle },
 } as const;

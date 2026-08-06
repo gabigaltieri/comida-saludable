@@ -35,16 +35,42 @@ function verifySignature(req: NextRequest, body: string, secret: string): boolea
 }
 
 type OrderRow = {
+  id: number;
   order_number: string;
   cliente: string;
   telefono: string;
   email: string | null;
   productos: { nombre: string; cantidad: number; precio: number; descripcion?: string }[];
   total: number;
+  estado: string;
   entrega: string;
   direccion: string | null;
   pago: string;
+  mp_payment_id: string | null;
+  mp_payment_status: string | null;
 };
+
+// Estados terminales de pago que ya no van a cambiar en MercadoPago.
+const ESTADOS_RECHAZO = new Set(["rejected", "cancelled", "refunded", "charged_back"]);
+
+async function logEvent(
+  orderNumber: string,
+  eventType: string,
+  detail: Record<string, unknown>,
+  orderId?: number
+) {
+  try {
+    await supabaseAdmin.from("order_events").insert({
+      order_id: orderId ?? null,
+      order_number: orderNumber,
+      event_type: eventType,
+      detail,
+    });
+  } catch (err) {
+    // El log de auditoría nunca debe tumbar el webhook.
+    console.error("Error guardando order_event:", err);
+  }
+}
 
 async function notifyAdmin(order: OrderRow, paymentId: string | null) {
   const productosList = order.productos
@@ -56,7 +82,6 @@ async function notifyAdmin(order: OrderRow, paymentId: string | null) {
 
   const entregaLabel = order.entrega === "envio" ? "Envío a domicilio" : "Retiro en local";
 
-  // ── Email ────────────────────────────────────────────────────────────────
   const resendKey = process.env.RESEND_API_KEY;
   const adminEmail = process.env.CONTACT_EMAIL || "262cosasricas.web@gmail.com";
 
@@ -88,7 +113,6 @@ async function notifyAdmin(order: OrderRow, paymentId: string | null) {
       console.error("Error enviando email al admin:", err);
     }
   }
-
 }
 
 export async function POST(req: NextRequest) {
@@ -96,6 +120,13 @@ export async function POST(req: NextRequest) {
   const { accessToken, webhookSecret } = await getMPCredentials();
 
   if (!verifySignature(req, rawBody, webhookSecret)) {
+    // Solo registramos si la request tiene forma real de venir de MercadoPago
+    // (trae los headers de firma); así no llenamos la auditoría con bots/escaneos
+    // que le pegan a la URL del webhook sin ningún dato válido.
+    const pareceSerMP = req.headers.get("x-signature") && req.headers.get("x-request-id");
+    if (pareceSerMP) {
+      await logEvent("desconocido", "webhook_signature_invalid", { hasSecret: Boolean(webhookSecret) });
+    }
     return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
   }
 
@@ -111,6 +142,10 @@ export async function POST(req: NextRequest) {
   }
 
   if (!accessToken) {
+    await logEvent("desconocido", "webhook_error", {
+      reason: "MP_ACCESS_TOKEN no configurado",
+      paymentNotificationId: notification.data.id,
+    });
     return NextResponse.json({ received: true });
   }
 
@@ -119,23 +154,90 @@ export async function POST(req: NextRequest) {
     const paymentClient = new Payment(client);
     const payment = await paymentClient.get({ id: notification.data.id });
 
-    if (payment.status === "approved" && payment.external_reference) {
-      const { data: order } = await supabaseAdmin
-        .from("orders")
-        .update({
-          estado: "pagado",
-          notas: `MP Payment ID: ${payment.id} | Método: ${payment.payment_type_id}`,
-        })
-        .eq("order_number", payment.external_reference)
-        .select()
-        .single();
+    const externalReference = payment.external_reference;
+    const paymentId = String(payment.id);
+    const status = payment.status ?? "unknown";
 
-      if (order) {
-        // Notificar al admin sin bloquear la respuesta a MP
-        notifyAdmin(order as OrderRow, String(payment.id)).catch(() => {});
+    if (!externalReference) {
+      await logEvent("desconocido", "webhook_error", {
+        reason: "Pago sin external_reference",
+        paymentId,
+        status,
+      });
+      return NextResponse.json({ received: true });
+    }
+
+    const { data: order, error: fetchError } = await supabaseAdmin
+      .from("orders")
+      .select("*")
+      .eq("order_number", externalReference)
+      .single();
+
+    if (fetchError || !order) {
+      // El pago existe en MercadoPago pero no hay pedido que lo reciba: no perderlo en el vacío.
+      await logEvent(externalReference, "payment_orphaned", {
+        paymentId,
+        status,
+        amount: payment.transaction_amount,
+      });
+      return NextResponse.json({ received: true });
+    }
+
+    const orderRow = order as OrderRow;
+
+    // Idempotencia: si ya procesamos este mismo pago con el mismo estado, no repetir efectos secundarios.
+    if (orderRow.mp_payment_id === paymentId && orderRow.mp_payment_status === status) {
+      await logEvent(externalReference, "webhook_duplicate_ignored", { paymentId, status }, orderRow.id);
+      return NextResponse.json({ received: true });
+    }
+
+    const updateFields: Record<string, unknown> = {
+      mp_payment_id: paymentId,
+      mp_payment_status: status,
+      payment_checked_at: new Date().toISOString(),
+    };
+
+    // Solo tocamos el estado del pedido si sigue en pago pendiente:
+    // no pisar decisiones manuales posteriores del admin (en preparación, entregado, etc).
+    if (orderRow.estado === "pendiente_pago") {
+      if (status === "approved") {
+        updateFields.estado = "pagado";
+      } else if (ESTADOS_RECHAZO.has(status)) {
+        updateFields.estado = "cancelado";
       }
     }
+
+    const { data: updated, error: updateError } = await supabaseAdmin
+      .from("orders")
+      .update(updateFields)
+      .eq("id", orderRow.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      await logEvent(externalReference, "webhook_error", {
+        reason: "Fallo al actualizar el pedido",
+        message: updateError.message,
+        paymentId,
+        status,
+      }, orderRow.id);
+      return NextResponse.json({ received: true });
+    }
+
+    await logEvent(externalReference, `payment_${status}`, {
+      paymentId,
+      amount: payment.transaction_amount,
+      paymentType: payment.payment_type_id,
+    }, orderRow.id);
+
+    if (status === "approved") {
+      notifyAdmin(updated as OrderRow, paymentId).catch(() => {});
+    }
   } catch (err) {
+    await logEvent("desconocido", "webhook_error", {
+      reason: err instanceof Error ? err.message : "Error desconocido",
+      paymentNotificationId: notification.data.id,
+    });
     console.error("Error procesando webhook MP:", err);
   }
 

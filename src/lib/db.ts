@@ -69,12 +69,17 @@ export interface Order {
   email?: string;
   productos: { nombre: string; cantidad: number; precio: number; descripcion?: string }[];
   total: number;
-  estado: "pendiente_pago" | "pendiente" | "en preparación" | "pagado" | "entregado" | "cancelado";
+  estado: "pendiente_pago" | "pendiente" | "en preparación" | "pagado" | "pendiente_envio" | "entregado" | "cancelado";
   entrega: "envio" | "retiro";
   direccion?: string;
   pago: string;
   notas?: string;
   created_at: string;
+  mp_payment_id?: string | null;
+  mp_payment_status?: string | null;
+  payment_checked_at?: string | null;
+  payment_override_note?: string | null;
+  payment_override_at?: string | null;
 }
 
 export async function getOrders(): Promise<Order[]> {
@@ -93,6 +98,36 @@ export async function updateOrderStatus(
     body: JSON.stringify({ estado }),
   });
   if (!res.ok) throw new Error("Error al actualizar estado");
+}
+
+export interface VerifyPaymentResult {
+  order_number: string;
+  pagado: boolean;
+  estado: Order["estado"];
+  pagos_encontrados: Array<{
+    id: string;
+    status?: string;
+    status_detail?: string;
+    transaction_amount?: number;
+    date_created?: string;
+    payment_type_id?: string;
+  }>;
+}
+
+export async function verifyOrderPayment(id: number): Promise<VerifyPaymentResult> {
+  const res = await fetch(`/api/admin/orders/${id}/verify-payment`, { method: "POST" });
+  if (!res.ok) throw new Error((await res.json().catch(() => null))?.error || "Error al verificar el pago");
+  return res.json();
+}
+
+export async function overrideOrderPayment(id: number, note: string): Promise<Order> {
+  const res = await fetch(`/api/admin/orders/${id}/override-payment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ note }),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => null))?.error || "Error al desbloquear el pedido");
+  return res.json();
 }
 
 // ── Combos ────────────────────────────────────────────────

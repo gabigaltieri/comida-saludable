@@ -2,14 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { formatPrice } from "@/lib/cart";
-import { getOrders, updateOrderStatus, Order } from "@/lib/db";
+import { getOrders, updateOrderStatus, verifyOrderPayment, overrideOrderPayment, Order, VerifyPaymentResult } from "@/lib/db";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   Clock, Loader2, CheckCircle2, XCircle, MessageCircle,
-  Search, ChevronDown, Package, Truck, Store, Save, Trash2,
+  Search, ChevronDown, Package, PackageCheck, Truck, Store, Save, Trash2,
+  AlertTriangle, ShieldCheck, LockOpen,
 } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/data";
+
+// Pedido pagado por MercadoPago sin ningún pago real confirmado (por MP o por el admin).
+function pagoSinConfirmar(p: Order): boolean {
+  return p.pago === "MercadoPago" && !p.mp_payment_id && !p.payment_override_note;
+}
 
 type Estado = Order["estado"];
 
@@ -18,20 +24,34 @@ const ESTADOS: { value: Estado; label: string; color: string; icon: React.Elemen
   { value: "pendiente", label: "Pendiente", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
   { value: "en preparación", label: "En preparación", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Loader2 },
   { value: "pagado", label: "Pagado", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+  { value: "pendiente_envio", label: "Pendiente de envío", color: "bg-indigo-100 text-indigo-700 border-indigo-200", icon: PackageCheck },
   { value: "entregado", label: "Entregado", color: "bg-sage-100 text-sage-700 border-sage-200", icon: CheckCircle2 },
   { value: "cancelado", label: "Cancelado", color: "bg-red-100 text-red-500 border-red-200", icon: XCircle },
 ];
 
 const ESTADO_FALLBACK = { label: "Desconocido", color: "bg-gray-100 text-gray-500 border-gray-200", icon: Clock };
 
+// "pendiente_pago" ya no se elige a mano: lo maneja el webhook de MP o la
+// verificación/desbloqueo manual. Mientras un pedido esté ahí sin confirmar,
+// el panel de "Cambiar estado" ni se muestra (aparece el aviso de pago).
+const ESTADOS_SELECCIONABLES = ESTADOS.filter((e) => e.value !== "pendiente_pago");
+
 const MENSAJES_WA: Record<string, string> = {
   pendiente_pago: "Tu pedido esta pendiente de pago. Completalo para que podamos procesarlo.",
   pendiente: "Recibimos tu pedido y esta pendiente de confirmacion. En breve te avisamos.",
   "en preparación": "Tu pedido esta en preparacion. Pronto estara listo!",
   pagado: "Confirmamos el pago de tu pedido. Ya lo estamos preparando!",
+  pendiente_envio: "Tu pedido ya esta listo y esperando a ser retirado/enviado. Te avisamos apenas salga!",
   entregado: "Tu pedido fue entregado. Gracias por elegirnos!",
   cancelado: "Tu pedido fue cancelado. Si tenes alguna consulta escribinos.",
 };
+
+const OPCIONES_PAGO_MANUAL: { label: string; nota: string }[] = [
+  { label: "Tarjeta", nota: "Pagó con tarjeta" },
+  { label: "Efectivo", nota: "Pagó en efectivo" },
+  { label: "Transferencia", nota: "Pagó por transferencia" },
+  { label: "Otro", nota: "Pagó por otro medio" },
+];
 
 const PAGE_SIZE = 20;
 const RESUMEN_MAX_CHARS = 70;
@@ -44,8 +64,12 @@ export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterEstado, setFilterEstado] = useState<Estado | "todos">("todos");
+  const [filterEstado, setFilterEstado] = useState<Estado | "todos" | "sin_confirmar">("todos");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [verificando, setVerificando] = useState<number | null>(null);
+  const [resultadoVerificacion, setResultadoVerificacion] = useState<Record<number, VerifyPaymentResult>>({});
+  const [desbloqueando, setDesbloqueando] = useState<number | null>(null);
+  const [mostrarDesbloqueo, setMostrarDesbloqueo] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   // estadoLocal guarda la selección pendiente de guardar por pedido
   const [estadoLocal, setEstadoLocal] = useState<Record<number, Estado>>({});
@@ -64,7 +88,10 @@ export default function AdminPedidos() {
     const matchSearch =
       p.cliente.toLowerCase().includes(search.toLowerCase()) ||
       p.order_number.toLowerCase().includes(search.toLowerCase());
-    const matchEstado = filterEstado === "todos" || p.estado === filterEstado;
+    const matchEstado =
+      filterEstado === "todos" ? true :
+      filterEstado === "sin_confirmar" ? pagoSinConfirmar(p) :
+      p.estado === filterEstado;
     return matchSearch && matchEstado;
   });
 
@@ -100,6 +127,40 @@ export default function AdminPedidos() {
   };
 
   const countByEstado = (e: Estado) => pedidos.filter((p) => p.estado === e).length;
+  const countSinConfirmar = pedidos.filter(pagoSinConfirmar).length;
+
+  const verificarPago = async (id: number) => {
+    setVerificando(id);
+    try {
+      const resultado = await verifyOrderPayment(id);
+      setResultadoVerificacion((prev) => ({ ...prev, [id]: resultado }));
+      if (resultado.pagado) {
+        const pagoAprobado = resultado.pagos_encontrados.find((p) => p.status === "approved");
+        setPedidos((prev) => prev.map((p) =>
+          p.id === id
+            ? { ...p, mp_payment_id: pagoAprobado?.id ?? p.mp_payment_id, mp_payment_status: "approved", estado: resultado.estado }
+            : p
+        ));
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al verificar el pago");
+    } finally {
+      setVerificando(null);
+    }
+  };
+
+  const desbloquearManualmente = async (id: number, nota: string) => {
+    setDesbloqueando(id);
+    try {
+      const actualizado = await overrideOrderPayment(id, nota);
+      setPedidos((prev) => prev.map((p) => (p.id === id ? { ...p, ...actualizado } : p)));
+      setMostrarDesbloqueo(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al desbloquear el pedido");
+    } finally {
+      setDesbloqueando(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -120,7 +181,7 @@ export default function AdminPedidos() {
       </div>
 
       {/* Status summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
         {ESTADOS.map(({ value, label, icon: Icon, color }) => (
           <button key={value}
             onClick={() => setFilterEstado(filterEstado === value ? "todos" : value)}
@@ -136,6 +197,32 @@ export default function AdminPedidos() {
           </button>
         ))}
       </div>
+
+      {/* Filtro: pedidos de MercadoPago sin pago confirmado */}
+      {countSinConfirmar > 0 && (
+        <div className="mb-6">
+          <button
+            onClick={() => setFilterEstado(filterEstado === "sin_confirmar" ? "todos" : "sin_confirmar")}
+            className={cn(
+              "flex items-center justify-between w-full p-4 rounded-2xl border-2 transition-all text-left",
+              filterEstado === "sin_confirmar"
+                ? "bg-red-50 text-red-700 border-red-300 shadow-sm"
+                : "bg-red-50/50 border-red-100 hover:border-red-200 text-red-600"
+            )}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p className="font-sans text-sm font-semibold">
+                  {countSinConfirmar} pedido{countSinConfirmar > 1 ? "s" : ""} de MercadoPago sin pago confirmado
+                </p>
+                <p className="font-sans text-xs opacity-80 mt-0.5">
+                  Se creó el pedido pero MercadoPago nunca confirmó un pago aprobado para él
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-6 max-w-sm">
@@ -269,69 +356,156 @@ export default function AdminPedidos() {
                               💬 {pedido.notas}
                             </p>
                           )}
+
+                          {pedido.pago === "MercadoPago" && pedido.mp_payment_id && (
+                            <p className="flex items-center gap-1.5 font-sans text-xs font-medium text-sage-600 bg-sage-50 border border-sage-100 rounded-lg px-3 py-2 mt-3">
+                              <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                              Pago confirmado — MP Payment ID: {pedido.mp_payment_id}
+                            </p>
+                          )}
+
+                          {pedido.pago === "MercadoPago" && !pedido.mp_payment_id && pedido.payment_override_note && (
+                            <p className="flex items-start gap-1.5 font-sans text-xs font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-3">
+                              <LockOpen className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                              <span>
+                                Desbloqueado manualmente por el admin: &ldquo;{pedido.payment_override_note}&rdquo;
+                                {pedido.payment_override_at && (
+                                  <> — {new Date(pedido.payment_override_at).toLocaleString("es-AR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</>
+                                )}
+                              </span>
+                            </p>
+                          )}
                         </div>
 
                         <div>
                           <p className="font-sans text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Cambiar estado</p>
-                          <div className="flex flex-col gap-2 mb-4">
-                            {ESTADOS.map(({ value, label, icon: Icon, color }) => {
-                              const seleccionado = estadoLocal[pedido.id] ?? pedido.estado;
-                              const esActual = pedido.estado === value && !estadoLocal[pedido.id];
-                              const esSeleccionado = seleccionado === value;
-                              return (
-                                <button key={value}
-                                  onClick={() => {
-                                    if (value === pedido.estado) {
-                                      setEstadoLocal((prev) => { const next = { ...prev }; delete next[pedido.id]; return next; });
-                                    } else {
-                                      setEstadoLocal((prev) => ({ ...prev, [pedido.id]: value }));
-                                    }
-                                  }}
-                                  className={cn(
-                                    "flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-sans text-sm font-medium transition-all text-left",
-                                    esSeleccionado ? `${color} shadow-sm` : "border-gray-100 text-gray-500 hover:border-gray-200 bg-white"
-                                  )}>
-                                  <Icon className="w-4 h-4" />
-                                  {label}
-                                  {esActual && <span className="ml-auto text-xs opacity-60">Actual</span>}
-                                </button>
-                              );
-                            })}
-                          </div>
 
-                          {/* Botón guardar — solo aparece si hay un cambio pendiente */}
-                          {estadoLocal[pedido.id] && estadoLocal[pedido.id] !== pedido.estado && (
-                            <button
-                              onClick={() => guardarEstado(pedido.id)}
-                              disabled={saving === pedido.id}
-                              className="flex items-center justify-center gap-2 w-full bg-sage-500 hover:bg-sage-600 disabled:opacity-60 text-white font-sans text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm mb-3"
-                            >
-                              {saving === pedido.id ? (
-                                <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
-                              ) : (
-                                <><Save className="w-4 h-4" />Guardar cambio</>
+                          {pagoSinConfirmar(pedido) ? (
+                            <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-4">
+                              <p className="flex items-center gap-2 font-sans text-sm font-bold text-red-700 mb-1">
+                                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                                Falta de pago
+                              </p>
+                              <p className="font-sans text-xs text-red-600 mb-3">
+                                MercadoPago no confirmó ningún pago aprobado para este pedido.
+                                No se puede cambiar el estado hasta verificar que se cobró.
+                              </p>
+
+                              {resultadoVerificacion[pedido.id] && !resultadoVerificacion[pedido.id].pagado && (
+                                <p className="font-sans text-xs text-red-500 mb-3">
+                                  {resultadoVerificacion[pedido.id].pagos_encontrados.length === 0
+                                    ? "Última verificación: no se encontró ningún pago."
+                                    : `Última verificación: intentos sin aprobar (${resultadoVerificacion[pedido.id].pagos_encontrados.map((p) => p.status).join(", ")}).`}
+                                </p>
                               )}
-                            </button>
-                          )}
 
-                          {savedOk === pedido.id && (
-                            <p className="font-sans text-xs text-sage-600 text-center mb-3 flex items-center justify-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Estado actualizado correctamente
-                            </p>
-                          )}
+                              <button
+                                onClick={() => verificarPago(pedido.id)}
+                                disabled={verificando === pedido.id}
+                                className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-sans text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm"
+                              >
+                                {verificando === pedido.id ? (
+                                  <><Loader2 className="w-4 h-4 animate-spin" /> Consultando MercadoPago...</>
+                                ) : (
+                                  <><ShieldCheck className="w-4 h-4" /> Verificar pago en MercadoPago</>
+                                )}
+                              </button>
 
-                          {(() => {
-                            const estadoActivo = estadoLocal[pedido.id] ?? pedido.estado;
-                            const mensaje = `Hola ${pedido.cliente.split(" ")[0]}! ${MENSAJES_WA[estadoActivo] ?? `Tu pedido ${pedido.order_number} fue actualizado.`} Numero de orden: ${pedido.order_number}.`;
-                            return (
-                              <a href={`https://wa.me/${pedido.telefono}?text=${encodeURIComponent(mensaje)}`}
-                                target="_blank" rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white font-sans text-sm font-medium py-3 rounded-xl transition-colors shadow-sm">
-                                <MessageCircle className="w-4 h-4" />
-                                Notificar al cliente
-                              </a>
-                            );
-                          })()}
+                              {mostrarDesbloqueo === pedido.id ? (
+                                <div className="mt-3 pt-3 border-t border-red-200">
+                                  <p className="font-sans text-xs font-medium text-red-700 mb-2">¿Cómo pagó?</p>
+                                  <div className="grid grid-cols-2 gap-2 mb-2">
+                                    {OPCIONES_PAGO_MANUAL.map((opcion) => (
+                                      <button
+                                        key={opcion.label}
+                                        onClick={() => desbloquearManualmente(pedido.id, opcion.nota)}
+                                        disabled={desbloqueando === pedido.id}
+                                        className="flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-sans text-sm font-semibold py-2.5 rounded-xl transition-colors shadow-sm"
+                                      >
+                                        {desbloqueando === pedido.id ? <Loader2 className="w-4 h-4 animate-spin" /> : opcion.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <button
+                                    onClick={() => setMostrarDesbloqueo(null)}
+                                    className="w-full font-sans text-sm text-gray-500 hover:text-gray-700 py-1 rounded-xl transition-colors"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setMostrarDesbloqueo(pedido.id)}
+                                  className="flex items-center justify-center gap-1.5 w-full text-amber-700 hover:text-amber-800 font-sans text-xs font-medium mt-3 pt-3 border-t border-red-200 transition-colors"
+                                >
+                                  <LockOpen className="w-3.5 h-3.5" />
+                                  Desbloquear pago
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex flex-col gap-2 mb-4">
+                                {ESTADOS_SELECCIONABLES.map(({ value, label, icon: Icon, color }) => {
+                                  const seleccionado = estadoLocal[pedido.id] ?? pedido.estado;
+                                  const esActual = pedido.estado === value && !estadoLocal[pedido.id];
+                                  const esSeleccionado = seleccionado === value;
+                                  return (
+                                    <button key={value}
+                                      onClick={() => {
+                                        if (value === pedido.estado) {
+                                          setEstadoLocal((prev) => { const next = { ...prev }; delete next[pedido.id]; return next; });
+                                        } else {
+                                          setEstadoLocal((prev) => ({ ...prev, [pedido.id]: value }));
+                                        }
+                                      }}
+                                      className={cn(
+                                        "flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-sans text-sm font-medium transition-all text-left",
+                                        esSeleccionado ? `${color} shadow-sm` : "border-gray-100 text-gray-500 hover:border-gray-200 bg-white"
+                                      )}>
+                                      <Icon className="w-4 h-4" />
+                                      {label}
+                                      {esActual && <span className="ml-auto text-xs opacity-60">Actual</span>}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Botón guardar — solo aparece si hay un cambio pendiente */}
+                              {estadoLocal[pedido.id] && estadoLocal[pedido.id] !== pedido.estado && (
+                                <button
+                                  onClick={() => guardarEstado(pedido.id)}
+                                  disabled={saving === pedido.id}
+                                  className="flex items-center justify-center gap-2 w-full bg-sage-500 hover:bg-sage-600 disabled:opacity-60 text-white font-sans text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm mb-3"
+                                >
+                                  {saving === pedido.id ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" />Guardando...</>
+                                  ) : (
+                                    <><Save className="w-4 h-4" />Guardar cambio</>
+                                  )}
+                                </button>
+                              )}
+
+                              {savedOk === pedido.id && (
+                                <p className="font-sans text-xs text-sage-600 text-center mb-3 flex items-center justify-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Estado actualizado correctamente
+                                </p>
+                              )}
+
+                              {(() => {
+                                const estadoActivo = estadoLocal[pedido.id] ?? pedido.estado;
+                                const mensaje = `Hola ${pedido.cliente.split(" ")[0]}! ${MENSAJES_WA[estadoActivo] ?? `Tu pedido ${pedido.order_number} fue actualizado.`} Numero de orden: ${pedido.order_number}.`;
+                                return (
+                                  <a href={`https://wa.me/${pedido.telefono}?text=${encodeURIComponent(mensaje)}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white font-sans text-sm font-medium py-3 rounded-xl transition-colors shadow-sm">
+                                    <MessageCircle className="w-4 h-4" />
+                                    Notificar al cliente
+                                  </a>
+                                );
+                              })()}
+                            </>
+                          )}
                         </div>
                       </div>
                     </motion.div>

@@ -20,11 +20,28 @@ export async function PATCH(
 
   const ESTADOS_VALIDOS = [
     "pendiente", "en preparación", "entregado",
-    "cancelado", "pendiente_pago", "pagado",
+    "cancelado", "pendiente_pago", "pagado", "pendiente_envio",
   ] as const;
 
   if (!ESTADOS_VALIDOS.includes(estado)) {
     return NextResponse.json({ error: "Estado inválido." }, { status: 400 });
+  }
+
+  const { data: existing, error: fetchError } = await supabaseAdmin
+    .from("orders")
+    .select("pago, mp_payment_id, payment_override_note")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !existing) {
+    return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
+  }
+
+  if (existing.pago === "MercadoPago" && !existing.mp_payment_id && !existing.payment_override_note) {
+    return NextResponse.json(
+      { error: "No se puede cambiar el estado: este pedido no tiene un pago confirmado por MercadoPago." },
+      { status: 409 }
+    );
   }
 
   const { data, error } = await supabaseAdmin
