@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       email: email || null,
       productos,
       total: serverTotal,
+      costo_envio: shippingCost,
       estado: "pendiente_pago",
       entrega,
       direccion: direccion || null,

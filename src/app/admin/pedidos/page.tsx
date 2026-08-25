@@ -329,7 +329,28 @@ export default function AdminPedidos() {
                                 )}
                               </div>
                             ))}
-                            <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100 mt-1">
+                            {pedido.entrega === "envio" && (
+                              <>
+                                <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100 mt-1">
+                                  <span className="font-sans text-gray-500">Subtotal productos</span>
+                                  <span className="font-sans text-gray-600">
+                                    {formatPrice(pedido.total - (pedido.costo_envio ?? 0))}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="font-sans text-gray-500 flex items-center gap-1.5">
+                                    <Truck className="w-3.5 h-3.5" /> Envío
+                                  </span>
+                                  <span className="font-sans text-gray-600">
+                                    {formatPrice(pedido.costo_envio ?? 0)}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            <div className={cn(
+                              "flex justify-between items-center text-sm mt-1",
+                              pedido.entrega === "envio" ? "pt-2" : "pt-2 border-t border-gray-100"
+                            )}>
                               <span className="font-sans font-semibold text-gray-700">Total</span>
                               <span className="font-serif text-xl font-semibold text-gray-800"
                                 style={{ fontFamily: "var(--font-cormorant, Georgia, serif)" }}>
